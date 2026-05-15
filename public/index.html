@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Qualificação de Partes — Imóveis Descolados</title>
+<style>
+  :root {
+    --bg: #F8F6F1;
+    --surface: #FFFFFF;
+    --border: #E2DDD5;
+    --border-strong: #C8C0B4;
+    --text: #1A1714;
+    --text-muted: #7A7168;
+    --accent: #1A3A2A;
+    --accent-light: #E8F0EB;
+    --accent-mid: #2D6647;
+    --danger: #C0392B;
+    --danger-light: #FDECEA;
+    --gold: #8B6914;
+    --gold-light: #FBF4E3;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 0 0 0.5px rgba(0,0,0,0.06);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  .container { max-width: 860px; margin: 0 auto; }
+
+  header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .logo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent);
+    color: #fff;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-family: 'Arial', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  header h1 {
+    font-size: 28px;
+    font-weight: normal;
+    color: var(--text);
+    letter-spacing: -0.02em;
+    margin-bottom: 0.4rem;
+  }
+
+  header p {
+    font-size: 15px;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  .section-title {
+    font-family: 'Arial', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  .party-label {
+    font-family: 'Arial', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .role-badge {
+    font-family: 'Arial', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 12px;
+  }
+
+  .role-comprador { background: var(--accent-light); color: var(--accent-mid); }
+  .role-vendedor { background: var(--gold-light); color: var(--gold); }
+
+  .role-selector {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 1rem;
+  }
+
+  .role-btn {
+    flex: 1;
+    padding: 7px 0;
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    font-family: 'Arial', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: all 0.15s;
+  }
+
+  .role-btn:hover { background: var(--bg); }
+  .role-btn.active-comprador { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .role-btn.active-vendedor { background: var(--gold); color: #fff; border-color: var(--gold); }
+
+  .doc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 1rem;
+  }
+
+  .doc-upload {
+    border: 1.5px dashed var(--border-strong);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    background: var(--bg);
+  }
+
+  .doc-upload:hover { border-color: var(--accent-mid); background: var(--accent-light); }
+  .doc-upload.has-file { border-style: solid; border-color: var(--accent-mid); background: var(--accent-light); }
+  .doc-upload.has-file .upload-icon { display: none; }
+  .doc-upload input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+  .upload-icon {
+    font-size: 22px;
+    margin-bottom: 4px;
+    display: block;
+    color: var(--text-muted);
+  }
+
+  .doc-label {
+    font-family: 'Arial', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    display: block;
+  }
+
+  .doc-sub {
+    font-family: 'Arial', sans-serif;
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .file-ok {
+    display: none;
+    font-size: 18px;
+    margin-bottom: 2px;
+  }
+
+  .doc-upload.has-file .file-ok { display: block; }
+
+  .extra-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 1rem;
+  }
+
+  .field-group { display: flex; flex-direction: column; gap: 4px; }
+  .field-group label { font-family: 'Arial', sans-serif; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.07em; }
+  .field-group input, .field-group select {
+    border: 0.5px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    font-family: 'Arial', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    background: var(--surface);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .field-group input:focus, .field-group select:focus { border-color: var(--accent-mid); }
+
+  .btn-row { display: flex; gap: 8px; align-items: center; }
+
+  .btn {
+    font-family: 'Arial', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 9px 18px;
+    border-radius: var(--radius-sm);
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-mid); }
+  .btn-primary:disabled { background: var(--border-strong); cursor: not-allowed; }
+  .btn-ghost { background: transparent; border: 0.5px solid var(--border-strong); color: var(--text-muted); }
+  .btn-ghost:hover { background: var(--bg); color: var(--text); }
+  .btn-danger { background: var(--danger-light); border: 0.5px solid #f5c6c2; color: var(--danger); }
+
+  .btn-add {
+    width: 100%;
+    padding: 10px;
+    border: 1.5px dashed var(--border-strong);
+    border-radius: var(--radius);
+    background: transparent;
+    font-family: 'Arial', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-bottom: 1.5rem;
+  }
+  .btn-add:hover { border-color: var(--accent-mid); color: var(--accent-mid); background: var(--accent-light); }
+
+  .generate-section {
+    text-align: center;
+    margin: 1.5rem 0;
+  }
+
+  .btn-generate {
+    background: var(--accent);
+    color: #fff;
+    font-family: 'Arial', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 14px 40px;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: 0 2px 8px rgba(26,58,42,0.25);
+  }
+  .btn-generate:hover { background: var(--accent-mid); transform: translateY(-1px); }
+  .btn-generate:disabled { background: var(--border-strong); cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .spinner {
+    display: none;
+    width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .result-block {
+    display: none;
+    margin-top: 1.5rem;
+  }
+
+  .result-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .result-header {
+    background: var(--accent);
+    color: #fff;
+    padding: 12px 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .result-header span {
+    font-family: 'Arial', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .btn-copy {
+    background: rgba(255,255,255,0.15);
+    border: 0.5px solid rgba(255,255,255,0.3);
+    color: #fff;
+    font-family: 'Arial', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-copy:hover { background: rgba(255,255,255,0.25); }
+
+  .result-body {
+    padding: 1.5rem;
+    font-size: 15px;
+    line-height: 1.85;
+    color: var(--text);
+    white-space: pre-wrap;
+  }
+
+  .party-section {
+    margin-bottom: 1.25rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .party-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+  .party-role-tag {
+    font-family: 'Arial', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Arial', sans-serif;
+    font-size: 12px;
+    color: var(--text-muted);
+    padding: 8px 0;
+  }
+
+  .status-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--border-strong);
+  }
+  .status-dot.loading { background: #E8A020; animation: pulse 1s infinite; }
+  .status-dot.ok { background: var(--accent-mid); }
+  .status-dot.err { background: var(--danger); }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  .error-msg {
+    background: var(--danger-light);
+    border: 0.5px solid #f5c6c2;
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-family: 'Arial', sans-serif;
+    font-size: 13px;
+    color: var(--danger);
+    margin-top: 1rem;
+    display: none;
+  }
+
+  .divider {
+    border: none;
+    border-top: 0.5px solid var(--border);
+    margin: 1.5rem 0;
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 2rem;
+    font-family: 'Arial', sans-serif;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <header>
+    <div class="logo-badge">⬡ Imóveis Descolados</div>
+    <h1>Qualificação de Partes</h1>
+    <p>Faça upload dos documentos para gerar a qualificação jurídica automaticamente</p>
+  </header>
+
+  <div id="parties-container"></div>
+
+  <button class="btn-add" onclick="addParty()">+ Adicionar Parte</button>
+
+  <div class="generate-section">
+    <button class="btn-generate" id="btn-generate" onclick="generateAll()">
+      <span id="btn-text">Gerar Qualificações</span>
+      <div class="spinner" id="spinner"></div>
+    </button>
+    <div class="status-bar" id="status-bar" style="justify-content:center; display:none;">
+      <div class="status-dot loading" id="status-dot"></div>
+      <span id="status-msg">Processando documentos...</span>
+    </div>
+    <div class="error-msg" id="error-msg"></div>
+  </div>
+
+  <div class="result-block" id="result-block">
+    <div class="result-card">
+      <div class="result-header">
+        <span>Qualificação Gerada</span>
+        <button class="btn-copy" onclick="copyResult()">Copiar Texto</button>
+      </div>
+      <div class="result-body" id="result-body"></div>
+    </div>
+  </div>
+
+  <footer>Gerado por IA · Revise antes de inserir na minuta</footer>
+</div>
+
+<script>
+let partyCount = 0;
+const parties = {};
+
+function addParty(role = 'comprador') {
+  partyCount++;
+  const id = partyCount;
+  parties[id] = { role, files: {} };
+
+  const div = document.createElement('div');
+  div.className = 'card';
+  div.id = `party-${id}`;
+  div.innerHTML = `
+    <div class="card-header">
+      <span class="party-label">Parte ${id}</span>
+      <button class="btn btn-danger" onclick="removeParty(${id})" style="padding:4px 12px; font-size:11px;">Remover</button>
+    </div>
+
+    <div class="role-selector">
+      <button class="role-btn ${role === 'comprador' ? 'active-comprador' : ''}" onclick="setRole(${id}, 'comprador', this)">Comprador</button>
+      <button class="role-btn ${role === 'vendedor' ? 'active-vendedor' : ''}" onclick="setRole(${id}, 'vendedor', this)">Vendedor</button>
+    </div>
+
+    <p class="section-title">Documentos</p>
+    <div class="doc-grid">
+      ${docUpload(id, 'cnh', '🪪', 'CNH', 'dados pessoais + CPF + RG')}
+      ${docUpload(id, 'residencia', '🏠', 'Comp. Residência', 'endereço completo')}
+      ${docUpload(id, 'certidao', '📄', 'Cert. Nasc./Casamento', 'estado civil')}
+      ${docUpload(id, 'extra', '📎', 'Outro Doc.', 'opcional')}
+    </div>
+
+    <p class="section-title">Informações Complementares</p>
+    <div class="extra-fields">
+      <div class="field-group">
+        <label>Profissão</label>
+        <input type="text" id="prof-${id}" placeholder="ex: engenheiro" />
+      </div>
+      <div class="field-group">
+        <label>E-mail</label>
+        <input type="email" id="email-${id}" placeholder="email@exemplo.com" />
+      </div>
+    </div>
+
+    <div class="status-bar" id="party-status-${id}" style="display:none;">
+      <div class="status-dot" id="party-dot-${id}"></div>
+      <span id="party-msg-${id}"></span>
+    </div>
+  `;
+  document.getElementById('parties-container').appendChild(div);
+}
+
+function docUpload(id, key, icon, label, sub) {
+  return `
+    <div class="doc-upload" id="doc-${id}-${key}">
+      <span class="upload-icon">${icon}</span>
+      <span class="file-ok">✅</span>
+      <span class="doc-label">${label}</span>
+      <span class="doc-sub">${sub}</span>
+      <input type="file" accept="image/*,application/pdf"
+        onchange="handleFile(${id}, '${key}', this)" />
+    </div>
+  `;
+}
+
+function setRole(id, role, btn) {
+  parties[id].role = role;
+  const btns = btn.parentElement.querySelectorAll('.role-btn');
+  btns.forEach(b => b.className = 'role-btn');
+  btn.className = `role-btn active-${role}`;
+}
+
+function removeParty(id) {
+  document.getElementById(`party-${id}`).remove();
+  delete parties[id];
+}
+
+function handleFile(id, key, input) {
+  const file = input.files[0];
+  if (!file) return;
+  parties[id].files[key] = file;
+  document.getElementById(`doc-${id}-${key}`).classList.add('has-file');
+}
+
+async function fileToBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+function getMediaType(file) {
+  if (file.type) return file.type;
+  if (file.name.endsWith('.pdf')) return 'application/pdf';
+  return 'image/jpeg';
+}
+
+async function extractFromDocs(id) {
+  const p = parties[id];
+  const prof = document.getElementById(`prof-${id}`).value.trim();
+  const email = document.getElementById(`email-${id}`).value.trim();
+
+  const content = [];
+
+  for (const [key, file] of Object.entries(p.files)) {
+    const b64 = await fileToBase64(file);
+    const mt = getMediaType(file);
+    const labels = {
+      cnh: 'CNH (dados pessoais, CPF, RG, data de nascimento, filiação)',
+      residencia: 'Comprovante de Residência (endereço completo com CEP)',
+      certidao: 'Certidão de Nascimento ou Casamento (estado civil, nome do cônjuge se casado)',
+      extra: 'Documento adicional'
+    };
+    if (mt === 'application/pdf') {
+      content.push({ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: b64 } });
+    } else {
+      content.push({ type: 'image', source: { type: 'base64', media_type: mt, data: b64 } });
+    }
+    content.push({ type: 'text', text: `[Documento acima: ${labels[key]}]` });
+  }
+
+  const extras = [];
+  if (prof) extras.push(`Profissão informada: ${prof}`);
+  if (email) extras.push(`E-mail informado: ${email}`);
+  if (extras.length) content.push({ type: 'text', text: extras.join('\n') });
+
+  content.push({
+    type: 'text',
+    text: `Você é um assistente jurídico especializado em contratos imobiliários brasileiros.
+Com base nos documentos acima, extraia as informações e gere APENAS o texto de qualificação no padrão de minuta imobiliária brasileira, no formato:
+
+NOME COMPLETO, brasileiro(a), [estado civil], [profissão], portador(a) da Cédula de Identidade RG nº [número] [órgão emissor/UF], inscrito(a) no CPF/MF sob o nº [xxx.xxx.xxx-xx], residente e domiciliado(a) na [endereço completo com bairro, cidade, UF e CEP], e-mail: [email].
+
+Regras:
+- Se casado(a): adicionar "casado(a) com [nome do cônjuge]" e o regime de bens se constar
+- Se o documento for de pessoa jurídica, adaptar para PJ com CNPJ, razão social e representante legal
+- Se algum dado não constar nos documentos, escreva [DADO NÃO LOCALIZADO]
+- Retorne APENAS o parágrafo de qualificação, sem explicações adicionais
+- Não invente dados, use apenas o que está nos documentos`
+  });
+
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      messages: [{ role: 'user', content }]
+    })
+  });
+
+  const data = await resp.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.content.find(b => b.type === 'text')?.text || '';
+}
+
+async function generateAll() {
+  const ids = Object.keys(parties).filter(id => document.getElementById(`party-${id}`));
+  if (ids.length === 0) { showError('Adicione ao menos uma parte antes de gerar.'); return; }
+
+  const hasFile = ids.some(id => Object.keys(parties[id].files).length > 0);
+  if (!hasFile) { showError('Faça upload de ao menos um documento para alguma parte.'); return; }
+
+  setLoading(true);
+  hideError();
+
+  const results = { comprador: [], vendedor: [] };
+
+  for (const id of ids) {
+    const p = parties[id];
+    setPartyStatus(id, 'loading', 'Analisando documentos...');
+    try {
+      const qual = await extractFromDocs(id);
+      results[p.role].push(qual);
+      setPartyStatus(id, 'ok', 'Extraído com sucesso');
+    } catch (e) {
+      setPartyStatus(id, 'err', 'Erro: ' + e.message);
+      results[p.role].push(`[ERRO AO PROCESSAR PARTE ${id}: ${e.message}]`);
+    }
+  }
+
+  let output = '';
+
+  if (results.vendedor.length) {
+    output += results.vendedor.length === 1
+      ? `VENDEDOR:\n\n${results.vendedor[0]}`
+      : results.vendedor.map((q, i) => `VENDEDOR ${i + 1}:\n\n${q}`).join('\n\n');
+    if (results.comprador.length) output += '\n\n' + '─'.repeat(60) + '\n\n';
+  }
+
+  if (results.comprador.length) {
+    output += results.comprador.length === 1
+      ? `COMPRADOR:\n\n${results.comprador[0]}`
+      : results.comprador.map((q, i) => `COMPRADOR ${i + 1}:\n\n${q}`).join('\n\n');
+  }
+
+  document.getElementById('result-body').textContent = output;
+  document.getElementById('result-block').style.display = 'block';
+  document.getElementById('result-block').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  setLoading(false);
+}
+
+function setPartyStatus(id, state, msg) {
+  const bar = document.getElementById(`party-status-${id}`);
+  const dot = document.getElementById(`party-dot-${id}`);
+  const msgEl = document.getElementById(`party-msg-${id}`);
+  bar.style.display = 'flex';
+  dot.className = 'status-dot ' + state;
+  msgEl.textContent = msg;
+}
+
+function setLoading(loading) {
+  const btn = document.getElementById('btn-generate');
+  const txt = document.getElementById('btn-text');
+  const spin = document.getElementById('spinner');
+  const bar = document.getElementById('status-bar');
+  btn.disabled = loading;
+  txt.style.display = loading ? 'none' : 'inline';
+  spin.style.display = loading ? 'block' : 'none';
+  bar.style.display = loading ? 'flex' : 'none';
+}
+
+function showError(msg) {
+  const el = document.getElementById('error-msg');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function hideError() {
+  document.getElementById('error-msg').style.display = 'none';
+}
+
+function copyResult() {
+  const text = document.getElementById('result-body').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.btn-copy');
+    const orig = btn.textContent;
+    btn.textContent = 'Copiado ✓';
+    setTimeout(() => btn.textContent = orig, 2000);
+  });
+}
+
+addParty('vendedor');
+addParty('comprador');
+</script>
+</body>
+</html>

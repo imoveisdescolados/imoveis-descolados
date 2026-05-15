@@ -1,0 +1,8 @@
+{
+  "name": "imoveis-descolados-tools",
+  "version": "2.0.0",
+  "description": "Ferramentas Imóveis Descolados — Qualificação de Partes + Gerador de Minuta",
+  "dependencies": {
+    "docx": "^9.6.1"
+  }
+}

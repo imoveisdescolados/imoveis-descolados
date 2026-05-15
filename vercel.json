@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/minuta",   "destination": "/public/minuta.html" },
+    { "source": "/(.*)",     "destination": "/public/$1" }
+  ]
+}
