@@ -1,8 +1,5 @@
 {
   "rewrites": [
-    { "source": "/api/proxy", "destination": "/api/proxy" },
-    { "source": "/api/docx",  "destination": "/api/docx"  },
-    { "source": "/minuta",    "destination": "/public/minuta.html" },
-    { "source": "/",          "destination": "/public/index.html"  }
+    { "source": "/minuta", "destination": "/minuta.html" }
   ]
 }
