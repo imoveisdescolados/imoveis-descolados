@@ -1,7 +1,8 @@
 {
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/minuta",   "destination": "/public/minuta.html" },
-    { "source": "/(.*)",     "destination": "/public/$1" }
+    { "source": "/api/proxy", "destination": "/api/proxy" },
+    { "source": "/api/docx",  "destination": "/api/docx"  },
+    { "source": "/minuta",    "destination": "/public/minuta.html" },
+    { "source": "/",          "destination": "/public/index.html"  }
   ]
 }
