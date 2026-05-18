@@ -69,6 +69,18 @@ footer{text-align:center;margin-top:2rem;font-family:Arial,sans-serif;font-size:
 .mv-add-btn{background:var(--ac);color:#fff;border:none;border-radius:var(--rs);padding:5px 12px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap}
 .mv-add-btn:hover{background:var(--am)}
 
+
+.ubox{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px 8px;border:1.5px dashed var(--bs);border-radius:var(--rs);cursor:pointer;font-family:Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);transition:all .15s;background:var(--sf);text-align:center;min-height:60px}
+.ubox:hover{border-color:var(--am);background:var(--al)}
+.ubox.ok{border-style:solid;border-color:var(--am);color:var(--am);background:var(--al)}
+.ubox-icon{font-size:18px}
+.ext-card{background:var(--al);border:.5px solid #B8D4C4;border-radius:var(--r);padding:1rem 1.25rem;margin-bottom:1rem}
+.ext-title{font-family:Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--am);margin-bottom:.6rem}
+.ext-hint{font-family:Arial,sans-serif;font-size:12px;color:var(--muted);margin-bottom:.75rem;line-height:1.4}
+.btn-ext{background:var(--am);color:#fff;border:none;border-radius:var(--rs);padding:8px 16px;font-family:Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:background .15s}
+.btn-ext:hover{background:var(--ac)}.btn-ext:disabled{background:var(--bs);cursor:not-allowed}
+.ext-status{font-family:Arial,sans-serif;font-size:12px;margin-left:10px}
+
 @media(max-width:600px){.c2,.c3,.c21,.c12{grid-template-columns:1fr}}
 </style>
 </head>
@@ -125,6 +137,26 @@ footer{text-align:center;margin-top:2rem;font-family:Arial,sans-serif;font-size:
 <div class="card">
   <span class="fl">Número de vendedores</span>
   <div class="rg"><label class="ro sel" onclick="sr(this,'nv','1');mv2(0)"><input type="radio" name="nv" value="1">1 vendedor</label><label class="ro" onclick="sr(this,'nv','2');mv2(1)"><input type="radio" name="nv" value="2">2 vendedores</label></div>
+</div>
+<div class="ext-card">
+  <div class="ext-title">⚡ Preencher automaticamente com documentos</div>
+  <div class="ext-hint">Faça upload dos documentos do vendedor — os campos serão preenchidos pela IA.</div>
+  <div class="fr c3" style="margin-bottom:.75rem">
+    <div class="ubox" id="ub-v1-cnh" onclick="trigUp('v1','cnh')">
+      <input type="file" id="fi-v1-cnh" accept="image/*,application/pdf" style="display:none" onchange="hdlUp('v1','cnh',this)">
+      <span class="ubox-icon" id="ic-v1-cnh">🪪</span><span>CNH</span>
+    </div>
+    <div class="ubox" id="ub-v1-res" onclick="trigUp('v1','res')">
+      <input type="file" id="fi-v1-res" accept="image/*,application/pdf" style="display:none" onchange="hdlUp('v1','res',this)">
+      <span class="ubox-icon" id="ic-v1-res">🏠</span><span>Comp. Residência</span>
+    </div>
+    <div class="ubox" id="ub-v1-cert" onclick="trigUp('v1','cert')">
+      <input type="file" id="fi-v1-cert" accept="image/*,application/pdf" style="display:none" onchange="hdlUp('v1','cert',this)">
+      <span class="ubox-icon" id="ic-v1-cert">📄</span><span>Certidão</span>
+    </div>
+  </div>
+  <button class="btn-ext" id="btn-ext-v1" onclick="extrairPreencher('v1')">Extrair e preencher ↗</button>
+  <span class="ext-status" id="st-v1"></span>
 </div>
 <div class="card" id="cv1">
   <div class="sdiv">Vendedor 1</div>
@@ -192,6 +224,26 @@ footer{text-align:center;margin-top:2rem;font-family:Arial,sans-serif;font-size:
   <span class="fl">Número de compradores</span>
   <div class="rg"><label class="ro sel" onclick="sr(this,'nc','1');mc2(0)"><input type="radio" name="nc" value="1">1 comprador</label><label class="ro" onclick="sr(this,'nc','2');mc2(1)"><input type="radio" name="nc" value="2">2 compradores</label></div>
 </div>
+<div class="ext-card">
+  <div class="ext-title">⚡ Preencher automaticamente com documentos</div>
+  <div class="ext-hint">Faça upload dos documentos do comprador — os campos serão preenchidos pela IA.</div>
+  <div class="fr c3" style="margin-bottom:.75rem">
+    <div class="ubox" id="ub-c1-cnh" onclick="trigUp('c1','cnh')">
+      <input type="file" id="fi-c1-cnh" accept="image/*,application/pdf" style="display:none" onchange="hdlUp('c1','cnh',this)">
+      <span class="ubox-icon" id="ic-c1-cnh">🪪</span><span>CNH</span>
+    </div>
+    <div class="ubox" id="ub-c1-res" onclick="trigUp('c1','res')">
+      <input type="file" id="fi-c1-res" accept="image/*,application/pdf" style="display:none" onchange="hdlUp('c1','res',this)">
+      <span class="ubox-icon" id="ic-c1-res">🏠</span><span>Comp. Residência</span>
+    </div>
+    <div class="ubox" id="ub-c1-cert" onclick="trigUp('c1','cert')">
+      <input type="file" id="fi-c1-cert" accept="image/*,application/pdf" style="display:none" onchange="hdlUp('c1','cert',this)">
+      <span class="ubox-icon" id="ic-c1-cert">📄</span><span>Certidão</span>
+    </div>
+  </div>
+  <button class="btn-ext" id="btn-ext-c1" onclick="extrairPreencher('c1')">Extrair e preencher ↗</button>
+  <span class="ext-status" id="st-c1"></span>
+</div>
 <div class="card">
   <div class="sdiv">Comprador 1</div>
   <div class="fr c2"><div><label class="fl">Nome completo</label><input type="text" id="c1n" placeholder="NOME EM MAIÚSCULAS"></div><div><label class="fl">Sexo</label><div class="rg"><label class="ro" onclick="sr(this,'c1s','m');updProfNac('c1','m')"><input type="radio" name="c1s" value="m">Masculino</label><label class="ro" onclick="sr(this,'c1s','f');updProfNac('c1','f')"><input type="radio" name="c1s" value="f">Feminino</label></div></div></div>
@@ -226,6 +278,22 @@ footer{text-align:center;margin-top:2rem;font-family:Arial,sans-serif;font-size:
 <!-- STEP 4 -->
 <div class="step" id="s4">
 <div class="stit">4 / 8 — O Imóvel</div>
+<div class="ext-card">
+  <div class="ext-title">⚡ Preencher automaticamente com documentos</div>
+  <div class="ext-hint">Faça upload do carnê de IPTU e/ou da matrícula do imóvel — os campos serão preenchidos pela IA.</div>
+  <div class="fr c2" style="margin-bottom:.75rem">
+    <div class="ubox" id="ub-im-iptu" onclick="trigUp('im','iptu')">
+      <input type="file" id="fi-im-iptu" accept="image/*,application/pdf" style="display:none" onchange="hdlUp('im','iptu',this)">
+      <span class="ubox-icon" id="ic-im-iptu">🏷️</span><span>Carnê IPTU</span>
+    </div>
+    <div class="ubox" id="ub-im-mat" onclick="trigUp('im','mat')">
+      <input type="file" id="fi-im-mat" accept="image/*,application/pdf" style="display:none" onchange="hdlUp('im','mat',this)">
+      <span class="ubox-icon" id="ic-im-mat">📑</span><span>Matrícula / RGI</span>
+    </div>
+  </div>
+  <button class="btn-ext" id="btn-ext-im" onclick="extrairImovel()">Extrair e preencher ↗</button>
+  <span class="ext-status" id="st-im"></span>
+</div>
 <div class="card">
   <div class="fr c21"><div><label class="fl">Rua</label><input type="text" id="irua" placeholder="ex: Rua Senador Vergueiro"></div><div><label class="fl">Número do prédio</label><input type="text" id="inpred" placeholder="ex: 56"></div></div>
   <div class="fr c21"><div><label class="fl">Bairro</label><input type="text" id="ibairro" placeholder="ex: Flamengo"></div><div><label class="fl">Número do apartamento</label><input type="text" id="iapto" placeholder="ex: 1004"></div></div>
@@ -431,6 +499,144 @@ function updProfNac(prefix,sexo){
     }
   }
 }
+
+// ─── Extração automática por documentos ───
+var docsCache={};
+
+function trigUp(prefix,tipo){document.getElementById('fi-'+prefix+'-'+tipo).click();}
+
+function hdlUp(prefix,tipo,input){
+  var file=input.files[0];if(!file)return;
+  if(!docsCache[prefix])docsCache[prefix]={};
+  docsCache[prefix][tipo]=file;
+  document.getElementById('ic-'+prefix+'-'+tipo).textContent='✅';
+  document.getElementById('ub-'+prefix+'-'+tipo).classList.add('ok');
+}
+
+function fileToB64(file){
+  return new Promise(function(res,rej){
+    var r=new FileReader();
+    r.onload=function(){res(r.result.split(',')[1]);};
+    r.onerror=rej;r.readAsDataURL(file);
+  });
+}
+
+
+async function extrairImovel(){
+  var docs=docsCache['im']||{};
+  if(!Object.keys(docs).length){alert('Faça upload de ao menos um documento.');return;}
+  var btn=document.getElementById('btn-ext-im');
+  var st=document.getElementById('st-im');
+  btn.disabled=true;btn.textContent='Extraindo...';st.textContent='';
+  try{
+    var content=[];
+    var lbls={iptu:'Carnê ou documento de IPTU (inscrição municipal, endereço completo do imóvel, número do apartamento)',mat:'Matrícula do imóvel no Cartório de Registro de Imóveis (número da matrícula, número do ofício/cartório, endereço, bairro)'};
+    for(var k in docs){
+      var file=docs[k],b64=await fileToB64(file),mt=file.type||'image/jpeg';
+      if(mt==='application/pdf'){content.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:b64}});}
+      else{content.push({type:'image',source:{type:'base64',media_type:mt,data:b64}});}
+      content.push({type:'text',text:'[Documento: '+lbls[k]+']'});
+    }
+    content.push({type:'text',text:'Extraia os dados do imóvel e retorne APENAS JSON válido sem markdown:\n{\n"rua":"nome da rua sem número ex: Rua Senador Vergueiro",\n"numPredio":"número do prédio ex: 56",\n"apto":"número do apartamento ex: 1004",\n"bairro":"nome do bairro",\n"matricula":"número da matrícula ex: 260.000",\n"oficio":"número do ofício do cartório ex: 9",\n"iptu":"inscrição do IPTU ex: 06935787"\n}\nSe dado não encontrado use string vazia. Retorne SOMENTE o JSON.'});
+    var resp=await fetch('/api/proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:500,messages:[{role:'user',content}]})});
+    var data=await resp.json();
+    var txt=(data.content||[]).find(function(b){return b.type==='text';});
+    if(!txt)throw new Error('Sem resposta da IA');
+    var clean=txt.text.replace(/```json|```/g,'').trim();
+    var d=JSON.parse(clean);
+    function set(id,val){var el=document.getElementById(id);if(el&&val)el.value=val;}
+    set('irua',   d.rua);
+    set('inpred', d.numPredio);
+    set('iapto',  d.apto);
+    set('ibairro',d.bairro);
+    set('imat',   d.matricula);
+    set('iofic',  d.oficio);
+    set('iiptu',  d.iptu);
+    st.textContent='✓ Preenchido — revise antes de continuar';
+    st.style.color='var(--am)';
+  }catch(e){
+    st.textContent='Erro: '+e.message;
+    st.style.color='var(--dg)';
+  }
+  btn.disabled=false;btn.textContent='Extrair e preencher ↗';
+}
+
+async function extrairPreencher(prefix){
+  var docs=docsCache[prefix]||{};
+  if(!Object.keys(docs).length){alert('Faça upload de ao menos um documento.');return;}
+  var btn=document.getElementById('btn-ext-'+prefix);
+  var st=document.getElementById('st-'+prefix);
+  btn.disabled=true;btn.textContent='Extraindo...';st.textContent='';
+  try{
+    var content=[];
+    var lbls={cnh:'CNH (nome completo, CPF, RG, data de nascimento, filiação)',res:'Comprovante de residência (endereço completo)',cert:'Certidão de nascimento ou casamento (estado civil, cônjuge se casado)'};
+    for(var k in docs){
+      var file=docs[k],b64=await fileToB64(file),mt=file.type||'image/jpeg';
+      if(mt==='application/pdf'){content.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:b64}});}
+      else{content.push({type:'image',source:{type:'base64',media_type:mt,data:b64}});}
+      content.push({type:'text',text:'[Documento: '+lbls[k]+']'});
+    }
+    content.push({type:'text',text:'Extraia os dados e retorne APENAS JSON válido sem markdown:\n{\n"nome":"NOME EM MAIÚSCULAS",\n"sexo":"m ou f",\n"nacionalidade":"brasileiro ou brasileira",\n"estadoCivil":"solteiro|casado|divorciado|viuvo|separado",\n"profissao":"profissão em minúsculas",\n"rg":"número do RG",\n"rgOrgao":"ex: IFP/RJ",\n"cpf":"CPF formatado",\n"email":"ou vazio",\n"endereco":"endereço completo",\n"anuente":{"nome":"","sexo":"f","nacionalidade":"brasileiro","rg":"","rgOrgao":"","cpf":"","email":"","regime":"comunhão parcial de bens"} ou null se não casado\n}\nSe dado não encontrado use string vazia. Retorne SOMENTE o JSON.'});
+    var resp=await fetch('/api/proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content}]})});
+    var data=await resp.json();
+    var txt=(data.content||[]).find(function(b){return b.type==='text';});
+    if(!txt)throw new Error('Sem resposta da IA');
+    var clean=txt.text.replace(/```json|```/g,'').trim();
+    var parsed=JSON.parse(clean);
+    preencherCampos(prefix,parsed);
+    st.textContent='✓ Preenchido — revise antes de continuar';
+    st.style.color='var(--am)';
+  }catch(e){
+    st.textContent='Erro: '+e.message;
+    st.style.color='var(--dg)';
+  }
+  btn.disabled=false;btn.textContent='Extrair e preencher ↗';
+}
+
+function preencherCampos(prefix,d){
+  function set(id,val){var el=document.getElementById(id);if(el&&val)el.value=val;}
+  // Nome
+  set(prefix+'n', d.nome);
+  // Sexo — click the radio
+  if(d.sexo){
+    var sBtn=document.querySelector('[onclick*="sr(this,\''+prefix+'s\',\''+d.sexo+'\'"]');
+    if(sBtn)sBtn.click();
+    else{RV[prefix+'s']=d.sexo;updProfNac(prefix,d.sexo);}
+  }
+  // Campos simples
+  set(prefix+'nac', d.nacionalidade);
+  set(prefix+'prof', d.profissao);
+  set(prefix+'rg',  d.rg);
+  set(prefix+'rgo', d.rgOrgao);
+  set(prefix+'cpf', d.cpf);
+  set(prefix+'em',  d.email);
+  set(prefix+'end', d.endereco);
+  // Estado civil (select)
+  var ecEl=document.getElementById(prefix+'ec');
+  if(ecEl&&d.estadoCivil){ecEl.value=d.estadoCivil;ecEl.dispatchEvent(new Event('change'));}
+  // Anuente (só vendedor 1)
+  if(d.anuente&&d.anuente.nome&&prefix==='v1'){
+    set('v1an',  d.anuente.nome);
+    set('v1aNac',d.anuente.nacionalidade||'brasileiro');
+    var aRgFull=(d.anuente.rg||'')+(d.anuente.rgOrgao?' '+d.anuente.rgOrgao:'');
+    set('v1aRg', aRgFull);
+    set('v1aCpf',d.anuente.cpf);
+    set('v1aEm', d.anuente.email);
+    // Regime (select)
+    var regEl=document.getElementById('v1aReg');
+    if(regEl&&d.anuente.regime){
+      var rv2=d.anuente.regime.toLowerCase();
+      ['comunhão parcial de bens','comunhão universal de bens','separação total de bens'].forEach(function(opt){
+        if(rv2.indexOf(opt.split(' ').slice(0,2).join(' '))>-1)regEl.value=opt;
+      });
+    }
+    if(d.anuente.sexo){
+      var asBtn=document.querySelector('[onclick*="sr(this,\'v1as\',\''+d.anuente.sexo+'\'"]');
+      if(asBtn)asBtn.click();
+    }
+  }
+}
+
 function chkAnu(){document.getElementById('blanu').style.display=document.getElementById('v1ec').value==='casado'?'block':'none';}
 function chkC1R(){document.getElementById('blc1r').style.display=document.getElementById('c1ec').value==='casado'?'block':'none';}
 function mgb(v){document.getElementById('bpb').style.display=v==='dias'?'block':'none';document.getElementById('bpbc').style.display=v==='certs'?'block':'none';document.getElementById('bpba').style.display=v==='alv'?'block':'none';}
