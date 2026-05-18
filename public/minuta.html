@@ -598,6 +598,49 @@ async function fileToB64(file){
 }
 
 
+async function extrairPreencher(prefix){
+  var docs=docsCache[prefix]||{};
+  if(!Object.keys(docs).length){alert('Faça upload de ao menos um documento.');return;}
+  var btn=document.getElementById('btn-ext-'+prefix);
+  var st=document.getElementById('st-'+prefix);
+  btn.disabled=true;btn.textContent='Extraindo...';st.textContent='';
+  var lbls={cnh:'CNH',res:'comprovante de residência',cert:'certidão'};
+  var merged={};
+  try{
+    for(var key in docs){
+      st.textContent='Lendo '+lbls[key]+'...';
+      var file=docs[key],r64=await fileToB64(file),content=[];
+      if(r64.mt==='application/pdf')content.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:r64.data}});
+      else content.push({type:'image',source:{type:'base64',media_type:r64.mt,data:r64.data}});
+      var prompt='';
+      if(key==='cnh')prompt='Extraia da CNH e retorne APENAS JSON sem markdown:\n{"nome":"NOME EM MAIUSCULAS","sexo":"m ou f","nacionalidade":"brasileiro ou brasileira","profissao":"profissao em minusculas ou vazio","rg":"APENAS os digitos do RG sem orgao","rgOrgao":"APENAS o orgao ex: DETRAN/RJ ou IFP/RJ","cpf":"CPF formatado","email":"email ou vazio"}\nRetorne SOMENTE o JSON.';
+      else if(key==='res')prompt='Extraia o endereco e retorne APENAS JSON sem markdown:\n{"endereco":"endereco residencial completo"}\nRetorne SOMENTE o JSON.';
+      else prompt='Extraia da certidao e retorne APENAS JSON sem markdown:\n{"estadoCivil":"solteiro ou casado ou divorciado ou viuvo","regimeBens":"regime de bens OBRIGATORIO se casado ex: comunhao parcial de bens","nomeConjuge":"nome do conjuge ou vazio","sexoConjuge":"m ou f ou vazio"}\nRetorne SOMENTE o JSON.';
+      content.push({type:'text',text:prompt});
+      var resp=await fetch('/api/proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:400,messages:[{role:'user',content:content}]})});
+      var data=await resp.json();
+      if(data.error)throw new Error(data.error.message||JSON.stringify(data.error));
+      var txt=(data.content||[]).find(function(b){return b.type==='text';});
+      if(!txt)throw new Error('Sem resposta para '+key);
+      var parsed=JSON.parse(txt.text.replace(/```json|```/g,'').trim());
+      for(var k in parsed){if(parsed[k]&&parsed[k]!=='')merged[k]=parsed[k];}
+    }
+    if(merged.estadoCivil==='casado'&&merged.nomeConjuge){
+      merged.anuente={nome:merged.nomeConjuge,sexo:merged.sexoConjuge||'f',
+        nacionalidade:'brasileiro',rg:'',rgOrgao:'',cpf:'',email:'',
+        regime:merged.regimeBens||''};
+    }
+    preencherCampos(prefix,merged);
+    // Preencher regime para comprador casado
+    if(merged.regimeBens&&prefix==='c1'){
+      var rEl=document.getElementById('c1reg');if(rEl)rEl.value=merged.regimeBens;
+    }
+    st.textContent='Preenchido — revise antes de continuar';
+    st.style.color='var(--am)';
+  }catch(e){st.textContent='Erro: '+e.message;st.style.color='var(--dg)';}
+  btn.disabled=false;btn.textContent='Extrair e preencher';
+}
+
 async function extrairImovel(){
   var docs=docsCache['im']||{};
   if(!Object.keys(docs).length){alert('Faça upload de ao menos um documento.');return;}
