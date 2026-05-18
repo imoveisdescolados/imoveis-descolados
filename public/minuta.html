@@ -538,7 +538,7 @@ async function extrairImovel(){
       content.push({type:'text',text:'[Documento: '+lbls[k]+']'});
     }
     content.push({type:'text',text:'Extraia os dados do imóvel e retorne APENAS JSON válido sem markdown:\n{\n"rua":"nome da rua sem número ex: Rua Senador Vergueiro",\n"numPredio":"número do prédio ex: 56",\n"apto":"número do apartamento ex: 1004",\n"bairro":"nome do bairro",\n"matricula":"número da matrícula ex: 260.000",\n"oficio":"número do ofício do cartório ex: 9",\n"iptu":"inscrição do IPTU ex: 06935787"\n}\nSe dado não encontrado use string vazia. Retorne SOMENTE o JSON.'});
-    var resp=await fetch('/api/proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:500,messages:[{role:'user',content}]})});
+    var resp=await fetch('/api/proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:500,messages:[{role:'user',content}]})});
     var data=await resp.json();
     var txt=(data.content||[]).find(function(b){return b.type==='text';});
     if(data.error)throw new Error(typeof data.error==='string'?data.error:(data.error.message||JSON.stringify(data.error)));
@@ -578,7 +578,7 @@ async function extrairPreencher(prefix){
       content.push({type:'text',text:'[Documento: '+lbls[k]+']'});
     }
     content.push({type:'text',text:'Extraia os dados e retorne APENAS JSON válido sem markdown:\n{\n"nome":"NOME EM MAIÚSCULAS",\n"sexo":"m ou f",\n"nacionalidade":"brasileiro ou brasileira",\n"estadoCivil":"solteiro|casado|divorciado|viuvo|separado",\n"profissao":"profissão em minúsculas",\n"rg":"número do RG",\n"rgOrgao":"ex: IFP/RJ",\n"cpf":"CPF formatado",\n"email":"ou vazio",\n"endereco":"endereço completo",\n"anuente":{"nome":"","sexo":"f","nacionalidade":"brasileiro","rg":"","rgOrgao":"","cpf":"","email":"","regime":"comunhão parcial de bens"} ou null se não casado\n}\nSe dado não encontrado use string vazia. Retorne SOMENTE o JSON.'});
-    var resp=await fetch('/api/proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content}]})});
+    var resp=await fetch('/api/proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:1000,messages:[{role:'user',content}]})});
     var data=await resp.json();
     var txt=(data.content||[]).find(function(b){return b.type==='text';});
     if(data.error)throw new Error(typeof data.error==='string'?data.error:(data.error.message||JSON.stringify(data.error)));
