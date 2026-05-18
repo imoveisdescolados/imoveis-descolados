@@ -488,7 +488,7 @@ function go(n){n=Math.max(1,Math.min(STEPS,n));document.getElementById('s'+cur).
 function upd(){var b=document.getElementById('prog');b.innerHTML='';for(var i=1;i<=STEPS;i++){var d=document.createElement('div');d.className='ps'+(i<cur?' done':i===cur?' cur':'');b.appendChild(d);}var L=['','Situações especiais','Vendedor(es)','Comprador(es)','Imóvel','Pagamento','Posse','Corretagem','Data e testemunhas'];document.getElementById('plbl').textContent=L[cur]||'';document.getElementById('sind').textContent='Passo '+cur+' de '+STEPS;document.getElementById('bbk').style.visibility=cur===1?'hidden':'visible';document.getElementById('bnx').style.display=cur===STEPS?'none':'inline-block';document.getElementById('bge').style.display=cur===STEPS?'inline-block':'none';}
 function sr(el,k,v){document.querySelectorAll('[onclick*="sr"][onclick*="\''+k+'\'"]').forEach(function(e){e.classList.remove('sel');});el.classList.add('sel');RV[k]=v;}
 function rv(k){return RV[k]||'';}
-function tg(k){TV[k]=!TV[k];var sw=document.getElementById('sw-'+k),cd=document.getElementById('cond-'+k);if(sw)sw.classList.toggle('on',TV[k]);if(cd)cd.classList.toggle('show',TV[k]);if(k==='v1est'){document.getElementById('blv1rg').style.display=TV[k]?'none':'block';document.getElementById('cond-v1est').classList.toggle('show',TV[k]);}}
+function tg(k){TV[k]=!TV[k];var sw=document.getElementById('sw-'+k),cd=document.getElementById('cond-'+k);if(sw)sw.classList.toggle('on',TV[k]);if(cd)cd.classList.toggle('show',TV[k]);if(k==='v1est'){document.getElementById('blv1rg').style.display=TV[k]?'none':'block';document.getElementById('cond-v1est').classList.toggle('show',TV[k]);}if(k==='moveis'){renderMoveis();}}
 function tv(k){return TV[k]||false;}
 function mv2(b){document.getElementById('cv2').style.display=b?'block':'none';document.getElementById('ext-v2').style.display=b?'block':'none';}
 function mc2(b){document.getElementById('cc2').style.display=b?'block':'none';document.getElementById('ext-c2').style.display=b?'block':'none';}
@@ -507,7 +507,7 @@ function togC2(tipo){if(tipo==='res'){c2MesmoEnd=!c2MesmoEnd;document.getElement
 function n2w(n){if(n===0)return'zero';var u=['','um','dois','três','quatro','cinco','seis','sete','oito','nove','dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'],d=['','','vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'],c=['','cento','duzentos','trezentos','quatrocentos','quinhentos','seiscentos','setecentos','oitocentos','novecentos'];function g3(x){if(x===0)return null;if(x===100)return'cem';var p=[],h=Math.floor(x/100),r=x%100;if(h>0)p.push(c[h]);if(r>0){if(r<20)p.push(u[r]);else{var t=Math.floor(r/10),uu=r%10;if(t)p.push(d[t]);if(uu)p.push(u[uu]);}}return p.join(' e ');}var mi=Math.floor(n/1e6),th=Math.floor((n%1e6)/1e3),re=n%1e3,p=[];if(mi>0)p.push(g3(mi)+(mi===1?' milhão':' milhões'));if(th>0)p.push((th===1?'um':g3(th))+' mil');if(re>0)p.push(g3(re));return p.join(' e ');}
 function exBRL(v){var n=Math.round(parseFloat(v)||0);if(!n)return'[VALOR]';var w=n2w(n);return(Math.floor(n/1e6)>0&&n%1e6===0)?w+' de reais':w+' reais';}
 function fBRL(v){return parseFloat(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
-function ext(i,o){var el=document.getElementById(o);if(el)el.value=exBRL(document.getElementById(i).value);}
+function ex(i,o){var el=document.getElementById(o);if(el)el.value=exBRL(document.getElementById(i).value);}
 function calcHW(){var t=parseFloat(g('vcorr')||0),p1v1=parseFloat(g('p1v1')||0),p1v2=parseFloat(g('p1v2')||0),p2v1=parseFloat(g('p2v1')||0),p2v2=parseFloat(g('p2v2')||0);var h1=t/2-p1v1-p2v1,h2=t/2-p1v2-p2v2;var e1=document.getElementById('hwv1'),e2=document.getElementById('hwv2');if(e1)e1.value='R$ '+fBRL(h1)+' — '+exBRL(h1);if(e2)e2.value='R$ '+fBRL(h2)+' — '+exBRL(h2);}
 function g(id){var el=document.getElementById(id);return el?(el.value||'').trim():'';}
 function adj(s,m,f){return s==='f'?f:m;}
@@ -714,6 +714,103 @@ function gerar(){
   document.getElementById('resblk').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
+// ─── Checklist de móveis ───────────────────────────────────────────────────
+var COMODOS=[
+  {id:'sala',nome:'SALA',itens:['Marcenaria planejada','Armario planejado','Projeto de iluminacao','Luminarias','Ar condicionado tipo split','Cortinas','Persianas','Mesa de jantar','Sofa','Home theater']},
+  {id:'cozinha',nome:'COZINHA',itens:['Marcenaria planejada','Armario planejado','Fogao','Coifa','Cooktop','Forno embutido','Geladeira','Microondas','Maquina de lavar','Maquina de secar','Lava-loucas','Bancada de pedra']},
+  {id:'quartos',nome:'QUARTOS',itens:['Marcenaria planejada','Armario planejado','Ar condicionado tipo split','Cortinas','Persianas']},
+  {id:'banheiros',nome:'BANHEIROS',itens:['Espelho','Armario de banheiro','Metais e louças','Box de vidro','Aquecedor de agua']},
+  {id:'varanda',nome:'VARANDA / SACADA',itens:['Churrasqueira','Bancada','Persiana']},
+  {id:'areaserv',nome:'ÁREA DE SERVIÇO / BANHEIRO DE SERVIÇO',itens:['Maquina de lavar','Maquina de secar','Armario planejado']},
+  {id:'escritorio',nome:'ESCRITÓRIO / HOME OFFICE',itens:['Marcenaria planejada','Armario planejado','Ar condicionado tipo split']}
+];
+
+var COMODOS_LABELS={
+  sala:'SALA',cozinha:'COZINHA',quartos:'QUARTOS',banheiros:'BANHEIROS',
+  varanda:'VARANDA / SACADA',areaserv:'ÁREA DE SERVIÇO / BANHEIRO DE SERVIÇO',
+  escritorio:'ESCRITÓRIO / HOME OFFICE'
+};
+
+var ITENS_LABELS={
+  'Marcenaria planejada':'Marcenaria planejada',
+  'Armario planejado':'Armário planejado',
+  'Projeto de iluminacao':'Projeto de iluminação',
+  'Luminarias':'Luminárias',
+  'Ar condicionado tipo split':'Ar condicionado tipo split',
+  'Cortinas':'Cortinas','Persianas':'Persianas',
+  'Mesa de jantar':'Mesa de jantar','Sofa':'Sofá',
+  'Home theater':'Home theater',
+  'Fogao':'Fogão','Coifa':'Coifa','Cooktop':'Cooktop',
+  'Forno embutido':'Forno embutido','Geladeira':'Geladeira',
+  'Microondas':'Micro-ondas','Maquina de lavar':'Máquina de lavar',
+  'Maquina de secar':'Máquina de secar','Lava-loucas':'Lava-louças',
+  'Bancada de pedra':'Bancada de pedra',
+  'Espelho':'Espelho','Armario de banheiro':'Armário de banheiro',
+  'Metais e loucas':'Metais e louças','Box de vidro':'Box de vidro',
+  'Aquecedor de agua':'Aquecedor de água',
+  'Churrasqueira':'Churrasqueira','Bancada':'Bancada'
+};
+
+var mvState={};
+COMODOS.forEach(function(c){mvState[c.id]={on:false,chk:{},custom:[]};c.itens.forEach(function(i){mvState[c.id].chk[i]=false;});});
+
+function renderMoveis(){
+  var el=document.getElementById('mov-checklist');if(!el)return;
+  if(!TV['moveis']){el.innerHTML='';return;}
+  el.innerHTML='';
+  COMODOS.forEach(function(c){
+    var s=mvState[c.id];
+    var wrap=document.createElement('div');wrap.className='mvroom';
+    var hd=document.createElement('div');hd.className='mvroom-hd';
+    hd.onclick=function(){s.on=!s.on;wrap.classList.toggle('open',s.on);renderMoveis();};
+    var sw=document.createElement('div');sw.className='sw'+(s.on?' on':'');
+    var lbl=document.createElement('label');lbl.textContent=COMODOS_LABELS[c.id]||c.nome;
+    hd.appendChild(sw);hd.appendChild(lbl);
+    var body=document.createElement('div');body.className='mvroom-body'+(s.on?' show':'');
+    if(s.on){
+      c.itens.forEach(function(item){
+        var row=document.createElement('div');row.className='mvitem';
+        var cb=document.createElement('input');cb.type='checkbox';cb.checked=s.chk[item]||false;
+        cb.onchange=function(){s.chk[item]=cb.checked;};
+        var lb=document.createElement('label');lb.textContent=ITENS_LABELS[item]||item;
+        row.appendChild(cb);row.appendChild(lb);body.appendChild(row);
+      });
+      (s.custom||[]).forEach(function(ci,idx){
+        var row=document.createElement('div');row.className='mvitem';
+        var cb=document.createElement('input');cb.type='checkbox';cb.checked=true;
+        var lb=document.createElement('label');lb.textContent=ci;
+        var rm=document.createElement('button');rm.textContent='×';rm.className='mv-rm';
+        rm.onclick=function(){s.custom.splice(idx,1);renderMoveis();};
+        row.appendChild(cb);row.appendChild(lb);row.appendChild(rm);body.appendChild(row);
+      });
+      var addRow=document.createElement('div');addRow.className='mv-add-row';
+      var inp=document.createElement('input');inp.type='text';inp.placeholder='+ item personalizado';inp.className='mv-inp';
+      var btn=document.createElement('button');btn.textContent='Adicionar';btn.className='btn-ext';btn.style.padding='4px 10px';btn.style.fontSize='11px';
+      btn.onclick=function(){var v=inp.value.trim();if(v){s.custom.push(v);inp.value='';renderMoveis();}};
+      addRow.appendChild(inp);addRow.appendChild(btn);
+      body.appendChild(addRow);
+    }
+    wrap.appendChild(hd);wrap.appendChild(body);
+    el.appendChild(wrap);
+  });
+}
+
+function getMoveisTxt(){
+  if(!TV['moveis'])return'';
+  var lines=[];
+  COMODOS.forEach(function(c){
+    var s=mvState[c.id];
+    if(!s.on)return;
+    var itens=c.itens.filter(function(i){return s.chk[i];}).map(function(i){return ITENS_LABELS[i]||i;});
+    itens=itens.concat(s.custom||[]);
+    if(itens.length===0)return;
+    lines.push(COMODOS_LABELS[c.id]||c.nome);
+    itens.forEach(function(i){lines.push(i);});
+    lines.push('');
+  });
+  return lines.join('\n').trim();
+}
+
 upd();
 </script>
 <datalist id="orgaos-rg">
@@ -773,75 +870,4 @@ upd();
 <option value="analista de sistemas"><option value="funcionária pública">
 </datalist>
 </body>
-</htmlasync function extrairParceiroInterno(prefix,outro,mesmoEnd,conjuges,btnId,stId){
-  var cnh=docsCache[prefix]&&docsCache[prefix]['cnh'];
-  if(!cnh){alert('Faça upload da CNH.');return;}
-  var btn=document.getElementById(btnId),st=document.getElementById(stId);
-  btn.disabled=true;btn.textContent='Extraindo...';st.textContent='';
-  var merged={};
-  try{
-    // 1. CNH — sempre individual
-    st.textContent='Lendo CNH...';
-    var r64=await fileToB64(cnh);
-    var content=[];
-    if(r64.mt==='application/pdf')content.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:r64.data}});
-    else content.push({type:'image',source:{type:'base64',media_type:r64.mt,data:r64.data}});
-    content.push({type:'text',text:'Extraia dados da CNH e retorne APENAS JSON sem markdown:\n{\n"nome":"NOME EM MAIÚSCULAS",\n"sexo":"m ou f",\n"nacionalidade":"brasileiro ou brasileira",\n"profissao":"profissão em minúsculas ou vazio",\n"rg":"APENAS os dígitos do RG",\n"rgOrgao":"APENAS o órgão ex: DETRAN/RJ ou IFP/RJ",\n"cpf":"CPF formatado",\n"email":"email ou vazio"\n}\nRetorne SOMENTE o JSON.'});
-    var resp=await fetch('/api/proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:500,messages:[{role:'user',content}]})});
-    var data=await resp.json();
-    if(data.error)throw new Error(data.error.message||JSON.stringify(data.error));
-    var txt=(data.content||[]).find(function(b){return b.type==='text';});
-    var parsed=JSON.parse(txt.text.replace(/```json|```/g,'').trim());
-    for(var k in parsed){if(parsed[k]&&parsed[k]!=='')merged[k]=parsed[k];}
-
-    // 2. Comprovante — separado se não for mesmo endereço
-    if(!mesmoEnd&&docsCache[prefix]&&docsCache[prefix]['res']){
-      st.textContent='Lendo comprovante...';
-      var rf=docsCache[prefix]['res'],rr64=await fileToB64(rf);
-      var c2=[];
-      if(rr64.mt==='application/pdf')c2.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:rr64.data}});
-      else c2.push({type:'image',source:{type:'base64',media_type:rr64.mt,data:rr64.data}});
-      c2.push({type:'text',text:'Extraia o endereço completo deste comprovante de residência e retorne APENAS JSON sem markdown:\n{"endereco":"endereço completo"}\nRetorne SOMENTE o JSON.'});
-      var r2=await fetch('/api/proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:200,messages:[{role:'user',content:c2}]})});
-      var d2=await r2.json();
-      if(!d2.error){var t2=(d2.content||[]).find(function(b){return b.type==='text';});if(t2){var p2=JSON.parse(t2.text.replace(/```json|```/g,'').trim());if(p2.endereco)merged.endereco=p2.endereco;}}
-    }
-
-    // 3. Certidão — própria ou do cônjuge (casal)
-    var certFile=null;
-    if(conjuges&&docsCache[outro]&&docsCache[outro]['cert'])certFile=docsCache[outro]['cert'];
-    else if(!conjuges&&docsCache[prefix]&&docsCache[prefix]['cert'])certFile=docsCache[prefix]['cert'];
-    if(certFile){
-      st.textContent='Lendo certidão...';
-      var cr64=await fileToB64(certFile),c3=[];
-      if(cr64.mt==='application/pdf')c3.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:cr64.data}});
-      else c3.push({type:'image',source:{type:'base64',media_type:cr64.mt,data:cr64.data}});
-      c3.push({type:'text',text:'Extraia da certidão de casamento e retorne APENAS JSON sem markdown:\n{\n"estadoCivil":"casado",\n"regimeBens":"OBRIGATÓRIO — extraia o regime de bens ex: comunhão parcial de bens"\n}\nRetorne SOMENTE o JSON.'});
-      var r3=await fetch('/api/proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:200,messages:[{role:'user',content:c3}]})});
-      var d3=await r3.json();
-      if(!d3.error){var t3=(d3.content||[]).find(function(b){return b.type==='text';});if(t3){try{var p3=JSON.parse(t3.text.replace(/```json|```/g,'').trim());for(var k3 in p3){if(p3[k3])merged[k3]=p3[k3];}}catch(e2){}}}
-    }
-
-    preencherCampos(prefix,merged);
-
-    // Mesmo endereço: copiar do outro
-    if(mesmoEnd){var eEl=document.getElementById(prefix+'end');if(eEl)eEl.value=document.getElementById(outro+'end').value||'';}
-
-    // Cônjuges: preencher regime de bens
-    if(conjuges&&merged.regimeBens){
-      var regId=prefix[0]==='v'?'v2regCas':'c2regCas';
-      var regEl=document.getElementById(regId);
-      if(regEl){
-        var rv3=merged.regimeBens.toLowerCase();
-        ['comunhão parcial de bens','comunhão universal de bens','separação total de bens'].forEach(function(o){
-          if(rv3.replace(/[ãõçé]/g,function(c){return{ã:'a',õ:'o',ç:'c',é:'e'}[c]||c;}).indexOf(o.replace(/[ãõçé]/g,function(c){return{ã:'a',õ:'o',ç:'c',é:'e'}[c]||c;}).split(' ').slice(0,2).join(' '))>-1)regEl.value=o;
-        });
-      }
-    }
-
-    st.textContent='✓ Preenchido'+(conjuges?' — cônjuges detectados':'')+' — revise antes de continuar';
-    st.style.color='var(--am)';
-  }catch(e){st.textContent='Erro: '+e.message;st.style.color='var(--dg)';}
-  btn.disabled=false;btn.textContent='Extrair e preencher ↗';
-}
-
+</html>
