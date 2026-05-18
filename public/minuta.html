@@ -461,7 +461,7 @@ footer{text-align:center;margin-top:2rem;font-family:Arial,sans-serif;font-size:
 
 <!-- RESULT -->
 <div id="resblk">
-  <div class="rh"><span>Minuta Gerada</span><button class="bcp" onclick="copiar()">Copiar texto</button></div>
+  <div class="rh"><span>Minuta Gerada</span><div style="display:flex;gap:8px"><button class="bcp" onclick="copiar()">Copiar texto</button><button class="bcp" id="btn-docx" onclick="gerarDocx()" style="background:rgba(255,255,255,.28)">Download Word ↓</button></div></div>
   <div class="rb" id="rb"></div>
 </div>
 
@@ -481,6 +481,7 @@ footer{text-align:center;margin-top:2rem;font-family:Arial,sans-serif;font-size:
 var cur=1,STEPS=8;
 var RV={nv:'1',nc:'1',v1s:'m',v2s:'m',c1s:'m',c2s:'m',v1as:'f',gatB:'dias',modC:'fin',multa:'pct',gatP:'prot',strC:'met'};
 var TV={};
+var lastMinutaTxt="";
 
 function go(n){n=Math.max(1,Math.min(STEPS,n));document.getElementById('s'+cur).classList.remove('on');cur=n;document.getElementById('s'+cur).classList.add('on');upd();window.scrollTo({top:0,behavior:'smooth'});}
 
@@ -569,11 +570,30 @@ function hdlUp(prefix,tipo,input){
   document.getElementById('ub-'+prefix+'-'+tipo).classList.add('ok');
 }
 
-function fileToB64(file){
+function compressImg(file){
+  return new Promise(function(res){
+    if(file.type==='application/pdf'){res({blob:file,mt:'application/pdf'});return;}
+    var img=new Image(),url=URL.createObjectURL(file);
+    img.onload=function(){
+      var maxW=1200,w=img.width,h=img.height;
+      if(w>maxW){h=Math.round(h*maxW/w);w=maxW;}
+      var c=document.createElement('canvas');c.width=w;c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      URL.revokeObjectURL(url);
+      c.toBlob(function(b){res({blob:b,mt:'image/jpeg'});},
+        'image/jpeg',0.75);
+    };
+    img.onerror=function(){URL.revokeObjectURL(url);res({blob:file,mt:file.type||'image/jpeg'});};
+    img.src=url;
+  });
+}
+
+async function fileToB64(file){
+  var r=await compressImg(file);
   return new Promise(function(res,rej){
-    var r=new FileReader();
-    r.onload=function(){res(r.result.split(',')[1]);};
-    r.onerror=rej;r.readAsDataURL(file);
+    var rd=new FileReader();
+    rd.onload=function(){res({data:rd.result.split(',')[1],mt:r.mt});};
+    rd.onerror=rej;rd.readAsDataURL(r.blob);
   });
 }
 
@@ -588,12 +608,12 @@ async function extrairImovel(){
     var content=[];
     var lbls={iptu:'Carnê ou documento de IPTU (inscrição municipal, endereço completo do imóvel, número do apartamento)',mat:'Matrícula do imóvel no Cartório de Registro de Imóveis (número da matrícula, número do ofício/cartório, endereço, bairro)'};
     for(var k in docs){
-      var file=docs[k],b64=await fileToB64(file),mt=file.type||'image/jpeg';
-      if(mt==='application/pdf'){content.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:b64}});}
-      else{content.push({type:'image',source:{type:'base64',media_type:mt,data:b64}});}
+      var file=docs[k],r64=await fileToB64(file);
+      if(r64.mt==='application/pdf'){content.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:r64.data}});}
+      else{content.push({type:'image',source:{type:'base64',media_type:r64.mt,data:r64.data}});}
       content.push({type:'text',text:'[Documento: '+lbls[k]+']'});
     }
-    content.push({type:'text',text:'Extraia os dados do imóvel e retorne APENAS JSON válido sem markdown:\n{\n"rua":"nome da rua sem número ex: Rua Senador Vergueiro",\n"numPredio":"número do prédio ex: 56",\n"apto":"número do apartamento ex: 1004",\n"bairro":"nome do bairro",\n"matricula":"número da matrícula ex: 260.000",\n"oficio":"número do ofício do cartório ex: 9",\n"iptu":"inscrição do IPTU ex: 06935787"\n}\nSe dado não encontrado use string vazia. Retorne SOMENTE o JSON.'});
+    content.push({type:'text',text:'Extraia os dados do imóvel e retorne APENAS JSON válido sem markdown:\n{\n"rua":"nome da rua sem número ex: Rua Senador Vergueiro",\n"numPredio":"APENAS o número do prédio na rua ex: 56 ou 901 (é o número da porta do prédio)",\n"apto":"APENAS os dígitos do apartamento ex: 201 ou 1004 — NÃO escreva a palavra APARTAMENTO",\n"bairro":"nome do bairro",\n"matricula":"número da matrícula ex: 260.000",\n"oficio":"número do ofício do cartório ex: 9",\n"iptu":"inscrição do IPTU ex: 06935787"\n}\nSe dado não encontrado use string vazia. Retorne SOMENTE o JSON.'});
     var resp=await fetch('/api/proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:500,messages:[{role:'user',content}]})});
     var data=await resp.json();
     var txt=(data.content||[]).find(function(b){return b.type==='text';});
@@ -628,9 +648,9 @@ async function extrairPreencher(prefix){
     var content=[];
     var lbls={cnh:'CNH (nome completo, CPF, RG, data de nascimento, filiação)',res:'Comprovante de residência (endereço completo)',cert:'Certidão de nascimento ou casamento (estado civil, cônjuge se casado)'};
     for(var k in docs){
-      var file=docs[k],b64=await fileToB64(file),mt=file.type||'image/jpeg';
-      if(mt==='application/pdf'){content.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:b64}});}
-      else{content.push({type:'image',source:{type:'base64',media_type:mt,data:b64}});}
+      var file=docs[k],r64=await fileToB64(file);
+      if(r64.mt==='application/pdf'){content.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:r64.data}});}
+      else{content.push({type:'image',source:{type:'base64',media_type:r64.mt,data:r64.data}});}
       content.push({type:'text',text:'[Documento: '+lbls[k]+']'});
     }
     content.push({type:'text',text:'Extraia os dados e retorne APENAS JSON válido sem markdown:\n{\n"nome":"NOME EM MAIÚSCULAS",\n"sexo":"m ou f",\n"nacionalidade":"brasileiro ou brasileira",\n"estadoCivil":"solteiro|casado|divorciado|viuvo|separado",\n"profissao":"profissão em minúsculas",\n"rg":"APENAS os dígitos do RG ex: 20772235",\n"rgOrgao":"APENAS o órgão ex: DETRAN/RJ ou IFP/RJ",\n"cpf":"CPF formatado",\n"email":"ou vazio",\n"endereco":"endereço completo",\n"anuente":{"nome":"","sexo":"f","nacionalidade":"brasileiro","rg":"APENAS dígitos do RG + órgão no campo rgOrgao","rgOrgao":"ex: IFP/RJ","cpf":"","email":"","regime":"OBRIGATÓRIO - extraia da certidão ex: comunhão parcial de bens"} ou null se não casado\n}\nSe dado não encontrado use string vazia. Retorne SOMENTE o JSON.'});
@@ -918,7 +938,8 @@ function gerar(){
 
   var txt='INSTRUMENTO PARTICULAR DE PROMESSA DE COMPRA E VENDA DE IMÓVEL IRRETRATÁVEL E IRREVOGÁVEL COM CLÁUSULA RESOLUTIVA, na forma abaixo, que entre si fazem:\n\n'+vTit+': '+vQ+';\n\n'+cTit+': '+cQ+'.\n\nAssim, pelo presente instrumento e nos melhores termos legais, ajustam os contratantes a venda do imóvel descrito na cláusula a seguir.\n\n\nDO OBJETO:\n\n'+C1+') Imóvel constituído pelo apartamento '+apto+' da '+rua+', '+npred+' – '+bairro+' – Rio de Janeiro/RJ. O imóvel encontra-se devidamente descrito e caracterizado na matrícula nº '+mat+' do '+ofic+'º Ofício do Registro de Imóveis, desta comarca, inscrição do IPTU n° '+iptu+ftxt+'.\n\n\nDA SITUAÇÃO DO OBJETO:\n\n'+C2+') '+OV+' '+decV+' que o referido imóvel se encontra livre e desembaraçado de todos e quaisquer ônus, tanto de natureza pessoal ou real, judicial ou extrajudicial, bem como que o imóvel não possui arrestos ou sequestros ou outras medidas expropriatórias, impostos, tarifas, taxas, contribuições e débitos de qualquer natureza, não tendo '+ov+' conhecimento de qualquer outra situação, quer pessoal ou relativa ao imóvel, que possa, de alguma forma, ser empecilho para presente negociação ou pôr em risco ou agravar ou onerar a situação do imóvel'+(grav?grav+'.':'.')+'\n\n'+decC.charAt(0).toUpperCase()+decC.slice(1)+' '+oc+' que '+vistC+' o imóvel e que '+acC+' recebê-lo no estado em que se encontra, '+incMov+movRef+movTxt+'\n\n\nDO VALOR DA VENDA:\n\n'+C3+') '+OV+' '+comV+' a vender, em caráter irrevogável e irretratável, '+aoC+' o dito imóvel pelo preço total de R$ '+fBRL(vT)+' ('+exBRL(vT)+'), conforme as condições abaixo estipuladas:\n\n'+pATxt+'\n\n'+pBTxt+'\n\n'+pCTxt+'\n\n\nDAS CERTIDÕES:\n\nAs certidões descritas na cláusula '+C4+' abaixo, deverão ser entregues '+peloV+' '+aoC+' em até '+prazoEC+' ('+n2w(parseInt(prazoEC))+') dias da assinatura do presente instrumento.\n\n'+C4+') Correrão por conta '+doV+' as seguintes certidões negativas do foro do Rio de Janeiro – RJ. São elas: do 1º e 2º Ofícios de Interdições e Tutelas, 2º Ofício de Registro de Distribuição da Capital (pesquisa cível e fazendária), Certidão Fiscal Estadual, Certidão negativa da Justiça Federal e Trabalhista, Ônus Reais atualizada, Quitação Fiscal imobiliária e Enfitêutica, certidão do 2º Ofício Distribuidor (referente ao Imóvel e '+aoV+'), declaração de quitação condominial com firma reconhecida, Taxa de Incêndio (FUNESBOM), Certidão negativa de tributos federais fornecida pela Secretaria da Receita Federal/Ministério da Fazenda, cópias autenticadas de cédula de identidade, cartão de inscrição no CPF e certidão de casamento/nascimento atualizada nos últimos 180 dias'+alvItem+'.\n\nEM TEMPO – Na hipótese das certidões descritas no Item '+C4+' perderem a sua validade jurídica, devido ao atraso na assinatura do contrato, a parte que der causa irá arcar com as despesas de novas certidões atualizadas.\n\nAs despesas de transferência oriundas do presente negócio, Cartório de notas para lavratura da escritura, Cartório de Registro de Imóveis e o pagamento do Imposto de Transmissão de Bens Imóveis (ITBI) serão suportados '+peloC+despExc+'.\n\nAinda as partes têm ciência que, havendo algum apontamento insolúvel junto às certidões descritas na cláusula '+C4+', sejam pessoais ou sobre o imóvel, o sinal ora recebido será devolvido '+aoC+' integralmente, no prazo de até 48 (quarenta e oito) horas.\n\n\nDA IMISSÃO NA POSSE:\n\n'+C5+') '+OC+' '+serC+' na posse do imóvel '+ptrig+dmTxt+'.\n\n'+C6+') O imóvel deve ser entregue livre e desimpedido de pessoas e coisas de quaisquer naturezas (exceto as listadas na cláusula '+C2+').\n\n'+C7+') O atraso na imissão '+doC+' na posse do imóvel importará em multa a ser paga '+peloV+' '+aoC+', em valor equivalente a 1,5% (hum e meio por cento) do valor do imóvel por cada período de 30 dias do atraso, calculados pro rata dia.\n\n\nDAS DESPESAS — entrega das chaves:\n\n'+C8+') Todos os impostos, taxas, tarifas, contribuições, multas e despesas que recaiam ou venham a recair sobre o Imóvel, com fato gerador até a data da entrega das chaves, serão de responsabilidade exclusiva '+doV+'. Caberá '+aoC+', a partir da data do recebimento destas, o pagamento de todos os impostos, taxas, tarifas e despesas que incidam ou venham a incidir sobre o imóvel, cujo fato gerador seja posterior à entrega das chaves.\n\n\nDAS OBRIGAÇÕES:\n\n'+C9+') O presente é firmado em caráter irrevogável e irretratável, obrigando-se as partes por si, seus herdeiros ou sucessores, a qualquer título, a cumprir as obrigações ora assumidas no presente Instrumento Particular.\n\n- Havendo inexecução deste Instrumento Particular por desistência '+doC+', '+esteC+' perderá em favor '+doV+' o sinal (descrito na cláusula III-A) ora recebido. Por outro lado, se a inexecução ocorrer por desistência '+doV+', '+esteV+' será obrigado a devolver o valor do sinal (descrito na cláusula III-A) recebido, mais o seu equivalente, nos moldes do artigo 420 do Código Civil Brasileiro de 2002, '+aoC+' em um prazo de até 72 horas da comunicação da inexecução.'+laudOb+averbCasTxt+'\n\n'+C10+') '+regTxt+clausEsp+'\n\n\nDOS HONORÁRIOS DE CORRETAGEM:\n\n'+CC+') '+corrTxt+'\n\n\nDAS DISPOSIÇÕES FINAIS:\n\n'+CD1+') Os Contratantes se obrigam a cumprir fielmente todos os termos e condições deste contrato, tornando sem efeito qualquer outro documento que divirja do seu conteúdo.\n\n'+CD2+') O presente instrumento só terá validade jurídica após o pagamento integral do valor do sinal descrito na cláusula III-A, que deverá ser pago em até 48 (quarenta e oito) horas, contadas a partir da assinatura deste instrumento.\n\n'+CD3+') As partes elegem o foro da Comarca da cidade do Rio de Janeiro para dirimir todas as dúvidas ou questões porventura advindas do presente, com renúncia expressa a qualquer outro.\n\nE, por estarem assim justos e contratados, assinam o presente eletronicamente, na presença de duas testemunhas abaixo assinadas.\n\nRio de Janeiro, '+dia+' de '+mes+' de '+ano+'.\n\n\n'+sigs;
 
-  document.getElementById('rb').innerHTML=textToHtml(txt);
+  lastMinutaTxt=txt;
+document.getElementById('rb').innerHTML=textToHtml(txt);
   document.getElementById('resblk').style.display='block';
   document.getElementById('nav').style.display='none';
   document.querySelectorAll('.step').forEach(function(s){s.classList.remove('on');});
@@ -1115,9 +1136,9 @@ async function extrairParceiroInterno(prefix,outro,mesmoEnd,conjuges,btnId,stId)
   btn.disabled=true;btn.textContent='Extraindo...';st.textContent='';
   try{
     var content=[];
-    var b64=await fileToB64(cnh),mt=cnh.type||'image/jpeg';
-    if(mt==='application/pdf')content.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:b64}});
-    else content.push({type:'image',source:{type:'base64',media_type:mt,data:b64}});
+    var r64=await fileToB64(cnh);
+    if(r64.mt==='application/pdf')content.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:r64.data}});
+    else content.push({type:'image',source:{type:'base64',media_type:r64.mt,data:r64.data}});
     content.push({type:'text',text:'[CNH do segundo contratante]'});
     if(!mesmoEnd&&docsCache[prefix]&&docsCache[prefix]['res']){
       var rf=docsCache[prefix]['res'],rb64=await fileToB64(rf),rmt=rf.type||'image/jpeg';
@@ -1129,9 +1150,9 @@ async function extrairParceiroInterno(prefix,outro,mesmoEnd,conjuges,btnId,stId)
     if(conjuges&&docsCache[outro]&&docsCache[outro]['cert'])certFile=docsCache[outro]['cert'];
     else if(!conjuges&&docsCache[prefix]&&docsCache[prefix]['cert'])certFile=docsCache[prefix]['cert'];
     if(certFile){
-      var cb64=await fileToB64(certFile),cmt=certFile.type||'image/jpeg';
-      if(cmt==='application/pdf')content.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:cb64}});
-      else content.push({type:'image',source:{type:'base64',media_type:cmt,data:cb64}});
+      var cr64=await fileToB64(certFile);
+      if(cr64.mt==='application/pdf')content.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:cr64.data}});
+      else content.push({type:'image',source:{type:'base64',media_type:cr64.mt,data:cr64.data}});
       content.push({type:'text',text:'[Certidao de casamento do casal - extraia o regime de bens]'});
     }
     var conjInstr=conjuges?'"regimeBens":"regime de bens OBRIGATORIO - sempre consta na certidao de casamento ex: comunhao parcial de bens ou comunhao universal de bens ou separacao total de bens",' :'';
@@ -1163,6 +1184,32 @@ async function extrairParceiroInterno(prefix,outro,mesmoEnd,conjuges,btnId,stId)
 
 function extrairV2(){extrairParceiroInterno('v2','v1',v2MesmoEnd,v2Conjuges,'btn-ext-v2','st-v2');}
 function extrairC2(){extrairParceiroInterno('c2','c1',c2MesmoEnd,c2Conjuges,'btn-ext-c2','st-c2');}
+
+function gerarDocx(){
+  if(!lastMinutaTxt){alert('Gere a minuta primeiro.');return;}
+  var btn=document.getElementById('btn-docx');
+  var orig=btn.textContent;
+  btn.textContent='Gerando...';btn.disabled=true;
+  var rua=g('irua')||'imovel',apto=g('iapto')||'apto';
+  var fname='minuta_'+rua.replace(/\s+/g,'_')+'_'+apto+'.docx';
+  fetch('/api/docx',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({text:lastMinutaTxt,filename:fname})
+  }).then(function(r){
+    if(!r.ok)return r.json().then(function(e){throw new Error(e.error||'Erro no servidor');});
+    return r.blob();
+  }).then(function(blob){
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');a.href=url;a.download=fname;
+    document.body.appendChild(a);a.click();
+    document.body.removeChild(a);URL.revokeObjectURL(url);
+  }).catch(function(e){
+    alert('Erro ao gerar Word: '+e.message);
+  }).finally(function(){
+    btn.textContent=orig;btn.disabled=false;
+  });
+}
 
 upd();
 </script>
