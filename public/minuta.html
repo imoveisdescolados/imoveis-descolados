@@ -128,8 +128,8 @@ footer{text-align:center;margin-top:2rem;font-family:Arial,sans-serif;font-size:
 </div>
 <div class="card" id="cv1">
   <div class="sdiv">Vendedor 1</div>
-  <div class="fr c2"><div><label class="fl">Nome completo</label><input type="text" id="v1n" placeholder="NOME EM MAIÚSCULAS"></div><div><label class="fl">Sexo</label><div class="rg"><label class="ro" onclick="sr(this,'v1s','m')"><input type="radio" name="v1s" value="m">Masculino</label><label class="ro" onclick="sr(this,'v1s','f')"><input type="radio" name="v1s" value="f">Feminino</label></div></div></div>
-  <div class="fr c3"><div><label class="fl">Nacionalidade</label><input type="text" id="v1nac" placeholder="brasileiro / brasileira"></div><div><label class="fl">Estado civil</label><select id="v1ec" onchange="chkAnu()"><option value="solteiro">Solteiro(a)</option><option value="casado">Casado(a)</option><option value="divorciado">Divorciado(a)</option><option value="viuvo">Viúvo(a)</option><option value="separado">Separado(a)</option></select></div><div><label class="fl">Profissão</label><input type="text" id="v1prof" placeholder="ex: engenheiro"></div></div>
+  <div class="fr c2"><div><label class="fl">Nome completo</label><input type="text" id="v1n" placeholder="NOME EM MAIÚSCULAS"></div><div><label class="fl">Sexo</label><div class="rg"><label class="ro" onclick="sr(this,'v1s','m');updProfNac('v1','m')"><input type="radio" name="v1s" value="m">Masculino</label><label class="ro" onclick="sr(this,'v1s','f');updProfNac('v1','f')"><input type="radio" name="v1s" value="f">Feminino</label></div></div></div>
+  <div class="fr c3"><div><label class="fl">Nacionalidade</label><input type="text" id="v1nac" placeholder="brasileiro / brasileira"></div><div><label class="fl">Estado civil</label><select id="v1ec" onchange="chkAnu()"><option value="solteiro">Solteiro(a)</option><option value="casado">Casado(a)</option><option value="divorciado">Divorciado(a)</option><option value="viuvo">Viúvo(a)</option><option value="separado">Separado(a)</option></select></div><div><label class="fl">Profissão</label><input type="text" id="v1prof" list="dl-prof-m" placeholder="ex: engenheiro"></div></div>
   <div class="tog" onclick="tg('v1est')" style="margin-bottom:6px"><div class="sw" id="sw-v1est"></div><label>Vendedor estrangeiro (sem RG brasileiro)</label></div>
   <div id="blv1rg"><div class="fr c2"><div><label class="fl">RG nº</label><input type="text" id="v1rg"></div><div><label class="fl">Órgão emissor / UF</label><input type="text" id="v1rgo" placeholder="ex: IFP/RJ" list="orgaos-rg"></div></div></div>
   <div class="cond" id="cond-v1est"><div class="fr c2"><div><label class="fl">Passaporte nº</label><input type="text" id="v1pass"></div><div><label class="fl">Emissor</label><input type="text" id="v1passe" placeholder="ex: Ministério dos Negócios Estrangeiros da Itália"></div></div><div><label class="fl">País de residência</label><input type="text" id="v1pais"></div></div>
@@ -149,8 +149,8 @@ footer{text-align:center;margin-top:2rem;font-family:Arial,sans-serif;font-size:
 </div>
 <div class="card" id="cv2" style="display:none">
   <div class="sdiv">Vendedor 2</div>
-  <div class="fr c2"><div><label class="fl">Nome completo</label><input type="text" id="v2n"></div><div><label class="fl">Sexo</label><div class="rg"><label class="ro" onclick="sr(this,'v2s','m')"><input type="radio" name="v2s" value="m">Masculino</label><label class="ro" onclick="sr(this,'v2s','f')"><input type="radio" name="v2s" value="f">Feminino</label></div></div></div>
-  <div class="fr c3"><div><label class="fl">Nacionalidade</label><input type="text" id="v2nac" placeholder="brasileiro / brasileira"></div><div><label class="fl">Estado civil</label><select id="v2ec"><option value="solteiro">Solteiro(a)</option><option value="casado">Casado(a)</option><option value="divorciado">Divorciado(a)</option><option value="viuvo">Viúvo(a)</option></select></div><div><label class="fl">Profissão</label><input type="text" id="v2prof"></div></div>
+  <div class="fr c2"><div><label class="fl">Nome completo</label><input type="text" id="v2n"></div><div><label class="fl">Sexo</label><div class="rg"><label class="ro" onclick="sr(this,'v2s','m');updProfNac('v2','m')"><input type="radio" name="v2s" value="m">Masculino</label><label class="ro" onclick="sr(this,'v2s','f');updProfNac('v2','f')"><input type="radio" name="v2s" value="f">Feminino</label></div></div></div>
+  <div class="fr c3"><div><label class="fl">Nacionalidade</label><input type="text" id="v2nac" placeholder="brasileiro / brasileira"></div><div><label class="fl">Estado civil</label><select id="v2ec"><option value="solteiro">Solteiro(a)</option><option value="casado">Casado(a)</option><option value="divorciado">Divorciado(a)</option><option value="viuvo">Viúvo(a)</option></select></div><div><label class="fl">Profissão</label><input type="text" id="v2prof" list="dl-prof-m"></div></div>
   <div class="fr c2"><div><label class="fl">RG nº</label><input type="text" id="v2rg"></div><div><label class="fl">Órgão emissor / UF</label><input type="text" id="v2rgo" list="orgaos-rg" placeholder="ex: IFP/RJ"></div></div>
   <div class="fr c2"><div><label class="fl">CPF</label><input type="text" id="v2cpf"></div><div><label class="fl">E-mail</label><input type="email" id="v2em"></div></div>
   <div class="fr c1"><label class="fl">Endereço residencial</label><input type="text" id="v2end"></div>
@@ -194,8 +194,8 @@ footer{text-align:center;margin-top:2rem;font-family:Arial,sans-serif;font-size:
 </div>
 <div class="card">
   <div class="sdiv">Comprador 1</div>
-  <div class="fr c2"><div><label class="fl">Nome completo</label><input type="text" id="c1n" placeholder="NOME EM MAIÚSCULAS"></div><div><label class="fl">Sexo</label><div class="rg"><label class="ro" onclick="sr(this,'c1s','m')"><input type="radio" name="c1s" value="m">Masculino</label><label class="ro" onclick="sr(this,'c1s','f')"><input type="radio" name="c1s" value="f">Feminino</label></div></div></div>
-  <div class="fr c3"><div><label class="fl">Nacionalidade</label><input type="text" id="c1nac" placeholder="brasileiro / brasileira"></div><div><label class="fl">Estado civil</label><select id="c1ec" onchange="chkC1R()"><option value="solteiro">Solteiro(a)</option><option value="casado">Casado(a)</option><option value="divorciado">Divorciado(a)</option><option value="viuvo">Viúvo(a)</option><option value="separado">Separado(a)</option></select></div><div><label class="fl">Profissão</label><input type="text" id="c1prof"></div></div>
+  <div class="fr c2"><div><label class="fl">Nome completo</label><input type="text" id="c1n" placeholder="NOME EM MAIÚSCULAS"></div><div><label class="fl">Sexo</label><div class="rg"><label class="ro" onclick="sr(this,'c1s','m');updProfNac('c1','m')"><input type="radio" name="c1s" value="m">Masculino</label><label class="ro" onclick="sr(this,'c1s','f');updProfNac('c1','f')"><input type="radio" name="c1s" value="f">Feminino</label></div></div></div>
+  <div class="fr c3"><div><label class="fl">Nacionalidade</label><input type="text" id="c1nac" placeholder="brasileiro / brasileira"></div><div><label class="fl">Estado civil</label><select id="c1ec" onchange="chkC1R()"><option value="solteiro">Solteiro(a)</option><option value="casado">Casado(a)</option><option value="divorciado">Divorciado(a)</option><option value="viuvo">Viúvo(a)</option><option value="separado">Separado(a)</option></select></div><div><label class="fl">Profissão</label><input type="text" id="c1prof" list="dl-prof-m"></div></div>
   <div class="fr c2"><div><label class="fl">RG nº</label><input type="text" id="c1rg"></div><div><label class="fl">Órgão emissor / UF</label><input type="text" id="c1rgo" placeholder="ex: IFP/RJ" list="orgaos-rg"></div></div>
   <div class="fr c2"><div><label class="fl">CPF</label><input type="text" id="c1cpf"></div><div><label class="fl">E-mail</label><input type="email" id="c1em"></div></div>
   <div class="fr c1"><label class="fl">Endereço residencial</label><input type="text" id="c1end"></div>
@@ -208,8 +208,8 @@ footer{text-align:center;margin-top:2rem;font-family:Arial,sans-serif;font-size:
 </div>
 <div class="card" id="cc2" style="display:none">
   <div class="sdiv">Comprador 2</div>
-  <div class="fr c2"><div><label class="fl">Nome completo</label><input type="text" id="c2n"></div><div><label class="fl">Sexo</label><div class="rg"><label class="ro" onclick="sr(this,'c2s','m')"><input type="radio" name="c2s" value="m">Masculino</label><label class="ro" onclick="sr(this,'c2s','f')"><input type="radio" name="c2s" value="f">Feminino</label></div></div></div>
-  <div class="fr c3"><div><label class="fl">Nacionalidade</label><input type="text" id="c2nac" placeholder="brasileiro / brasileira"></div><div><label class="fl">Estado civil</label><select id="c2ec"><option value="solteiro">Solteiro(a)</option><option value="casado">Casado(a)</option><option value="divorciado">Divorciado(a)</option><option value="viuvo">Viúvo(a)</option></select></div><div><label class="fl">Profissão</label><input type="text" id="c2prof"></div></div>
+  <div class="fr c2"><div><label class="fl">Nome completo</label><input type="text" id="c2n"></div><div><label class="fl">Sexo</label><div class="rg"><label class="ro" onclick="sr(this,'c2s','m');updProfNac('c2','m')"><input type="radio" name="c2s" value="m">Masculino</label><label class="ro" onclick="sr(this,'c2s','f');updProfNac('c2','f')"><input type="radio" name="c2s" value="f">Feminino</label></div></div></div>
+  <div class="fr c3"><div><label class="fl">Nacionalidade</label><input type="text" id="c2nac" placeholder="brasileiro / brasileira"></div><div><label class="fl">Estado civil</label><select id="c2ec"><option value="solteiro">Solteiro(a)</option><option value="casado">Casado(a)</option><option value="divorciado">Divorciado(a)</option><option value="viuvo">Viúvo(a)</option></select></div><div><label class="fl">Profissão</label><input type="text" id="c2prof" list="dl-prof-m"></div></div>
   <div class="fr c2"><div><label class="fl">RG nº</label><input type="text" id="c2rg"></div><div><label class="fl">Órgão emissor / UF</label><input type="text" id="c2rgo" list="orgaos-rg" placeholder="ex: IFP/RJ"></div></div>
   <div class="fr c2"><div><label class="fl">CPF</label><input type="text" id="c2cpf"></div><div><label class="fl">E-mail</label><input type="email" id="c2em"></div></div>
   <div class="fr c1"><label class="fl">Endereço (deixe em branco se igual ao comprador 1)</label><input type="text" id="c2end"></div>
@@ -337,7 +337,7 @@ footer{text-align:center;margin-top:2rem;font-family:Arial,sans-serif;font-size:
 
 <!-- RESULT -->
 <div id="resblk">
-  <div class="rh"><span>Minuta Gerada</span><div style="display:flex;gap:8px"><button class="bcp" onclick="copiar()">Copiar texto</button><button class="bcp" id="btn-docx" onclick="gerarDocx()" style="background:rgba(255,255,255,.25)">Download Word ↓</button></div></div>
+  <div class="rh"><span>Minuta Gerada</span><button class="bcp" onclick="copiar()">Copiar texto</button></div>
   <div class="rb" id="rb"></div>
 </div>
 
@@ -357,7 +357,6 @@ footer{text-align:center;margin-top:2rem;font-family:Arial,sans-serif;font-size:
 var cur=1,STEPS=8;
 var RV={nv:'1',nc:'1',v1s:'m',v2s:'m',c1s:'m',c2s:'m',v1as:'f',gatB:'dias',modC:'fin',multa:'pct',gatP:'prot',strC:'met'};
 var TV={};
-var lastMinutaTxt="";
 
 function go(n){n=Math.max(1,Math.min(STEPS,n));document.getElementById('s'+cur).classList.remove('on');cur=n;document.getElementById('s'+cur).classList.add('on');upd();window.scrollTo({top:0,behavior:'smooth'});}
 
@@ -398,6 +397,40 @@ function chkBancoOutro(id){
   inp.style.display=sel.value==='__outro__'?'block':'none';
   if(sel.value!=='__outro__')inp.value='';
 }
+
+var PROFS_PAIRS=[
+  ['advogado','advogada'],['médico','médica'],['engenheiro','engenheira'],
+  ['engenheiro civil','engenheira civil'],['arquiteto','arquiteta'],
+  ['empresário','empresária'],['aposentado','aposentada'],
+  ['servidor público','servidora pública'],['professor','professora'],
+  ['administrador','administradora'],['contador','contadora'],
+  ['psicólogo','psicóloga'],['farmacêutico','farmacêutica'],
+  ['corretor de imóveis','corretora de imóveis'],['economista','economista'],
+  ['jornalista','jornalista'],['militar','militar'],['investidor','investidora'],
+  ['comerciante','comerciante'],['autônomo','autônoma'],
+  ['analista de sistemas','analista de sistemas'],
+  ['funcionário público','funcionária pública'],['dentista','dentista']
+];
+function updProfNac(prefix,sexo){
+  // Switch datalist
+  var inp=document.getElementById(prefix+'prof');
+  if(inp){
+    inp.setAttribute('list',sexo==='f'?'dl-prof-f':'dl-prof-m');
+    // If current value is a known profession, convert to correct gender
+    var cur=inp.value.trim().toLowerCase();
+    PROFS_PAIRS.forEach(function(p){
+      if(cur===p[0]||cur===p[1])inp.value=sexo==='f'?p[1]:p[0];
+    });
+  }
+  // Auto-fill nationality
+  var nac=document.getElementById(prefix+'nac');
+  if(nac){
+    var cv=nac.value.trim().toLowerCase();
+    if(!cv||cv==='brasileiro'||cv==='brasileira'){
+      nac.value=sexo==='f'?'brasileira':'brasileiro';
+    }
+  }
+}
 function chkAnu(){document.getElementById('blanu').style.display=document.getElementById('v1ec').value==='casado'?'block':'none';}
 function chkC1R(){document.getElementById('blc1r').style.display=document.getElementById('c1ec').value==='casado'?'block':'none';}
 function mgb(v){document.getElementById('bpb').style.display=v==='dias'?'block':'none';document.getElementById('bpbc').style.display=v==='certs'?'block':'none';document.getElementById('bpba').style.display=v==='alv'?'block':'none';}
@@ -433,8 +466,8 @@ function ecStr(v,s){var m={solteiro:'solteiro',casado:'casado',divorciado:'divor
 
 function qv(n){
   var px=n===1?'v1':'v2';
-  var nome=g(px+'n'),s=rv(px+'s')||'m',nac=g(px+'nac')||(s==='f'?'brasileira':'brasileiro');
-  var ecv=ecStr(g(px+'ec')||'solteiro',s),prof=g(px+'prof'),cpf=g(px+'cpf'),em=g(px+'em'),end=g(px+'end');
+  var nome=g(px+'n'),s=rv(px+'s')||'m',nac=(g(px+'nac')||(s==='f'?'brasileira':'brasileiro')).toLowerCase();
+  var ecv=ecStr(g(px+'ec')||'solteiro',s),prof=g(px+'prof').toLowerCase(),cpf=g(px+'cpf'),em=g(px+'em'),end=g(px+'end');
   var port=adj(s,'portador','portadora'),insc=adj(s,'inscrito','inscrita'),res=adj(s,'residente e domiciliado','residente e domiciliada');
   var doc='';
   if(n===1&&tv('v1est')){doc='portador do passaporte nº '+g('v1pass')+' emitido por: '+g('v1passe');}
@@ -451,8 +484,8 @@ function qv(n){
 
 function qc(n){
   var px=n===1?'c1':'c2';
-  var nome=g(px+'n'),s=rv(px+'s')||'m',nac=g(px+'nac')||(s==='f'?'brasileira':'brasileiro');
-  var ecv=ecStr(g(px+'ec')||'solteiro',s),prof=g(px+'prof'),cpf=g(px+'cpf'),em=g(px+'em');
+  var nome=g(px+'n'),s=rv(px+'s')||'m',nac=(g(px+'nac')||(s==='f'?'brasileira':'brasileiro')).toLowerCase();
+  var ecv=ecStr(g(px+'ec')||'solteiro',s),prof=g(px+'prof').toLowerCase(),cpf=g(px+'cpf'),em=g(px+'em');
   var end=g(px+'end')||(n===2?g('c1end'):'');
   var port=adj(s,'portador','portadora'),insc=adj(s,'inscrito','inscrita'),res=adj(s,'residente e domiciliado','residente e domiciliada');
   return nome+', '+nac+', '+ecv+', '+prof+', '+port+' da Cédula de Identidade nº '+g(px+'rg')+' – '+g(px+'rgo')+', '+insc+' no CPF sob o nº '+cpf+', e-mail: '+em+', '+res+(end?' '+end:'');
@@ -538,23 +571,23 @@ function gerar(){
   var movRef=movTxtGerado?'obrigando-se '+ov+' a conservá-los e entregá-los nas mesmas condições quando da vistoria realizada, nesta data. Ficam as fotos do site www.imoveisdescolados.com.br como referência.':'obrigando-se '+ov+' a conservá-lo e entregá-lo nas mesmas condições quando da vistoria realizada, nesta data. Ficam as fotos do site www.imoveisdescolados.com.br como referência.';
   var incMov=movTxtGerado?'incluindo os móveis e objetos listados abaixo, ':'';
 
-  var pATxt='- R$ '+fBRL(vA)+' ('+exBRL(vA)+'), a título de sinal e princípio de pagamento, a serem pagos no ato da assinatura do presente instrumento, através de transferência bancária em nome '+doV+' para '+dadosB+'.';
+  var pATxt=C3+'-A) R$ '+fBRL(vA)+' ('+exBRL(vA)+'), a título de sinal e princípio de pagamento, a serem pagos no ato da assinatura do presente instrumento, através de transferência bancária em nome '+doV+' para '+dadosB+'.';
 
   var pBtrig='';
   if(gatB==='dias')pBtrig='no ato da assinatura do Contrato Particular de Compra e Venda com Alienação Fiduciária, com força de escritura pública, que deverá ocorrer em até '+prazoB+' ('+n2w(parseInt(prazoB))+') dias após a assinatura deste instrumento';
   else if(gatB==='certs')pBtrig='após a apresentação das certidões negativas listadas no item '+C2;
   else pBtrig='no ato da assinatura do Contrato Particular de Compra e Venda com Alienação Fiduciária, com força de escritura pública, que deverá ser assinado em até 30 (trinta) dias contados a partir da obtenção do alvará de venda do '+senhorio;
   var pBdest=bDest&&financAtivo?' Os referidos recursos deverão ser destinados obrigatória e exclusivamente '+peloC+' à quitação do saldo devedor do financiamento imobiliário vinculado ao imóvel objeto deste instrumento, contrato nº '+contratoF+', junto à '+bancoF+', como condição para a liberação do gravame e transferência do bem livre e desembaraçado '+aoC+'.':'';
-  var pBTxt='- R$ '+fBRL(vB)+' ('+exBRL(vB)+'), por meio de uma parcela fixa e irreajustável, a serem pagos com recursos próprios, '+pBtrig+', através de PIX ou transferência bancária em nome '+doV+' para '+dadosB+'.'+pBdest+' O atraso no pagamento desta parcela importará em multa a ser paga '+peloC+' '+aoV+', em valor equivalente a 1,5% (hum e meio por cento) do saldo remanescente por cada período de 30 dias do atraso, calculados pro rata die.';
+  var pBTxt=C3+'-B) R$ '+fBRL(vB)+' ('+exBRL(vB)+'), por meio de uma parcela fixa e irreajustável, a serem pagos com recursos próprios, '+pBtrig+', através de PIX ou transferência bancária em nome '+doV+' para '+dadosB+'.'+pBdest+' O atraso no pagamento desta parcela importará em multa a ser paga '+peloC+' '+aoV+', em valor equivalente a 1,5% (hum e meio por cento) do saldo remanescente por cada período de 30 dias do atraso, calculados pro rata die.';
 
   var prt5d='Fica acertado que, tão logo se encontre assinado e celebrado o contrato particular de compra e venda com alienação fiduciária com força de escritura pública, '+oc+' terão um prazo máximo de 5 (cinco) dias úteis para apresentá-lo para registro perante o cartório competente, devendo fornecer cópia do protocolo cartorário '+aoV+'.';
   var multDt=multa==='dia'?'O não cumprimento dos prazos ora estabelecidos implicará na incidência de multa diária no valor de R$ '+fBRL(mdia)+' ('+exBRL(mdia)+') por dia de atraso, até o efetivo cumprimento da obrigação. ':'';
   var pCTxt='';
-  if(modC==='fin')pCTxt='- R$ '+fBRL(vC)+' ('+exBRL(vC)+') a serem pagos '+peloC+' por meio de recursos de financiamento imobiliário nos moldes da instituição financeira financiadora, ou seja, após o efetivo registro do contrato de financiamento imobiliário com força de escritura pública. O efetivo registro é providência a cargo e às expensas '+doC+', que deverá fornecer '+aoV+' uma cópia do instrumento registrado. '+prt5d+' '+multDt+'Tão logo o contrato particular de compra e venda com alienação fiduciária com força de escritura pública esteja registrado na matrícula do imóvel, caberá a instituição financeira transferir o valor para a conta '+doV+' em '+dadosB+'.';
-  else if(modC==='fgts')pCTxt='- R$ '+fBRL(vC)+' ('+exBRL(vC)+') a serem pagos '+peloC+' por meio de recursos do FGTS (aproximadamente R$ '+fBRL(vFgts)+') e de financiamento imobiliário (aproximadamente R$ '+fBRL(vFinc)+') nos moldes da instituição financeira financiadora, após o efetivo registro do contrato de financiamento imobiliário com força de escritura pública. A divisão dos valores é aproximada, uma vez que dependerá do valor efetivo do FGTS para liberação, comprometendo-se, neste ato, '+oc+' à integralização do saldo com financiamento bancário, independentemente do valor existente nas contas do FGTS. O efetivo registro é providência a cargo e às expensas '+doC+', que deverá fornecer '+aoV+' uma cópia do instrumento registrado. '+prt5d+' '+multDt+'Tão logo o contrato particular de compra e venda com alienação fiduciária com força de escritura pública esteja registrado na matrícula do imóvel, caberá a instituição financeira transferir o valor para a conta '+doV+' em '+dadosB+'.';
-  else if(modC==='cons')pCTxt='- R$ '+fBRL(vC)+' ('+exBRL(vC)+') a serem pagos '+peloC+' por meio de recursos de carta de crédito de consórcio contemplada, destinada à aquisição do imóvel objeto deste instrumento, após o efetivo registro do Contrato Particular de Compra e Venda com Alienação Fiduciária, com força de escritura pública. O efetivo registro é providência a cargo e às expensas '+doC+', que deverá fornecer '+aoV+' uma cópia do instrumento registrado. '+prt5d+' Tão logo o contrato particular de compra e venda com alienação fiduciária com força de escritura pública esteja registrado na matrícula do imóvel, caberá a instituição financeira transferir o valor para a conta '+doV+' em '+dadosB+'.';
-  else if(modC==='propb')pCTxt='- R$ '+fBRL(vC)+' ('+exBRL(vC)+'), por meio de uma parcela fixa e irreajustável, a serem pagos com recursos próprios, após a baixa da alienação fiduciária junto ao '+ofic+'º Registro Geral de Imóveis, no ato da assinatura da escritura definitiva de compra e venda'+(dataEsc?', a qual deverá ocorrer em '+dataEsc:'')+', mediante PIX ou transferência bancária em nome '+doV+' para '+dadosB+'. O atraso no pagamento desta parcela importará em multa equivalente a 1,5% (um e meio por cento) do valor desta parcela por cada período de 30 (trinta) dias de atraso, calculados pro rata die.';
-  else pCTxt='- R$ '+fBRL(vC)+' ('+exBRL(vC)+'), por meio de uma parcela fixa e irreajustável, a serem pagos com recursos próprios'+(dataEsc?', no ato da assinatura da escritura definitiva em '+dataEsc:'')+', mediante PIX ou transferência bancária em nome '+doV+' para '+dadosB+'.';
+  if(modC==='fin')pCTxt=C3+'-C) R$ '+fBRL(vC)+' ('+exBRL(vC)+') a serem pagos '+peloC+' por meio de recursos de financiamento imobiliário nos moldes da instituição financeira financiadora, ou seja, após o efetivo registro do contrato de financiamento imobiliário com força de escritura pública. O efetivo registro é providência a cargo e às expensas '+doC+', que deverá fornecer '+aoV+' uma cópia do instrumento registrado. '+prt5d+' '+multDt+'Tão logo o contrato particular de compra e venda com alienação fiduciária com força de escritura pública esteja registrado na matrícula do imóvel, caberá a instituição financeira transferir o valor para a conta '+doV+' em '+dadosB+'.';
+  else if(modC==='fgts')pCTxt=C3+'-C) R$ '+fBRL(vC)+' ('+exBRL(vC)+') a serem pagos '+peloC+' por meio de recursos do FGTS (aproximadamente R$ '+fBRL(vFgts)+') e de financiamento imobiliário (aproximadamente R$ '+fBRL(vFinc)+') nos moldes da instituição financeira financiadora, após o efetivo registro do contrato de financiamento imobiliário com força de escritura pública. A divisão dos valores é aproximada, uma vez que dependerá do valor efetivo do FGTS para liberação, comprometendo-se, neste ato, '+oc+' à integralização do saldo com financiamento bancário, independentemente do valor existente nas contas do FGTS. O efetivo registro é providência a cargo e às expensas '+doC+', que deverá fornecer '+aoV+' uma cópia do instrumento registrado. '+prt5d+' '+multDt+'Tão logo o contrato particular de compra e venda com alienação fiduciária com força de escritura pública esteja registrado na matrícula do imóvel, caberá a instituição financeira transferir o valor para a conta '+doV+' em '+dadosB+'.';
+  else if(modC==='cons')pCTxt=C3+'-C) R$ '+fBRL(vC)+' ('+exBRL(vC)+') a serem pagos '+peloC+' por meio de recursos de carta de crédito de consórcio contemplada, destinada à aquisição do imóvel objeto deste instrumento, após o efetivo registro do Contrato Particular de Compra e Venda com Alienação Fiduciária, com força de escritura pública. O efetivo registro é providência a cargo e às expensas '+doC+', que deverá fornecer '+aoV+' uma cópia do instrumento registrado. '+prt5d+' Tão logo o contrato particular de compra e venda com alienação fiduciária com força de escritura pública esteja registrado na matrícula do imóvel, caberá a instituição financeira transferir o valor para a conta '+doV+' em '+dadosB+'.';
+  else if(modC==='propb')pCTxt=C3+'-C) R$ '+fBRL(vC)+' ('+exBRL(vC)+'), por meio de uma parcela fixa e irreajustável, a serem pagos com recursos próprios, após a baixa da alienação fiduciária junto ao '+ofic+'º Registro Geral de Imóveis, no ato da assinatura da escritura definitiva de compra e venda'+(dataEsc?', a qual deverá ocorrer em '+dataEsc:'')+', mediante PIX ou transferência bancária em nome '+doV+' para '+dadosB+'. O atraso no pagamento desta parcela importará em multa equivalente a 1,5% (um e meio por cento) do valor desta parcela por cada período de 30 (trinta) dias de atraso, calculados pro rata die.';
+  else pCTxt=C3+'-C) R$ '+fBRL(vC)+' ('+exBRL(vC)+'), por meio de uma parcela fixa e irreajustável, a serem pagos com recursos próprios'+(dataEsc?', no ato da assinatura da escritura definitiva em '+dataEsc:'')+', mediante PIX ou transferência bancária em nome '+doV+' para '+dadosB+'.';
 
   var C4=nc();
   var alvItem=laudemio?' e alvará de venda emitido pelo '+senhorio:'';
@@ -617,8 +650,7 @@ function gerar(){
 
   var txt='INSTRUMENTO PARTICULAR DE PROMESSA DE COMPRA E VENDA DE IMÓVEL IRRETRATÁVEL E IRREVOGÁVEL COM CLÁUSULA RESOLUTIVA, na forma abaixo, que entre si fazem:\n\n'+vTit+': '+vQ+';\n\n'+cTit+': '+cQ+'.\n\nAssim, pelo presente instrumento e nos melhores termos legais, ajustam os contratantes a venda do imóvel descrito na cláusula a seguir.\n\n\nDO OBJETO:\n\n'+C1+') Imóvel constituído pelo apartamento '+apto+' da '+rua+', '+npred+' – '+bairro+' – Rio de Janeiro/RJ. O imóvel encontra-se devidamente descrito e caracterizado na matrícula nº '+mat+' do '+ofic+'º Ofício do Registro de Imóveis, desta comarca, inscrição do IPTU n° '+iptu+ftxt+'.\n\n\nDA SITUAÇÃO DO OBJETO:\n\n'+C2+') '+OV+' '+decV+' que o referido imóvel se encontra livre e desembaraçado de todos e quaisquer ônus, tanto de natureza pessoal ou real, judicial ou extrajudicial, bem como que o imóvel não possui arrestos ou sequestros ou outras medidas expropriatórias, impostos, tarifas, taxas, contribuições e débitos de qualquer natureza, não tendo '+ov+' conhecimento de qualquer outra situação, quer pessoal ou relativa ao imóvel, que possa, de alguma forma, ser empecilho para presente negociação ou pôr em risco ou agravar ou onerar a situação do imóvel'+(grav?grav+'.':'.')+'\n\n'+decC.charAt(0).toUpperCase()+decC.slice(1)+' '+oc+' que '+vistC+' o imóvel e que '+acC+' recebê-lo no estado em que se encontra, '+incMov+movRef+movTxt+'\n\n\nDO VALOR DA VENDA:\n\n'+C3+') '+OV+' '+comV+' a vender, em caráter irrevogável e irretratável, '+aoC+' o dito imóvel pelo preço total de R$ '+fBRL(vT)+' ('+exBRL(vT)+'), conforme as condições abaixo estipuladas:\n\n'+pATxt+'\n\n'+pBTxt+'\n\n'+pCTxt+'\n\n\nDAS CERTIDÕES:\n\nAs certidões descritas na cláusula '+C4+' abaixo, deverão ser entregues '+peloV+' '+aoC+' em até '+prazoEC+' ('+n2w(parseInt(prazoEC))+') dias da assinatura do presente instrumento.\n\n'+C4+') Correrão por conta '+doV+' as seguintes certidões negativas do foro do Rio de Janeiro – RJ. São elas: do 1º e 2º Ofícios de Interdições e Tutelas, 2º Ofício de Registro de Distribuição da Capital (pesquisa cível e fazendária), Certidão Fiscal Estadual, Certidão negativa da Justiça Federal e Trabalhista, Ônus Reais atualizada, Quitação Fiscal imobiliária e Enfitêutica, certidão do 2º Ofício Distribuidor (referente ao Imóvel e '+aoV+'), declaração de quitação condominial com firma reconhecida, Taxa de Incêndio (FUNESBOM), Certidão negativa de tributos federais fornecida pela Secretaria da Receita Federal/Ministério da Fazenda, cópias autenticadas de cédula de identidade, cartão de inscrição no CPF e certidão de casamento/nascimento atualizada nos últimos 180 dias'+alvItem+'.\n\nEM TEMPO – Na hipótese das certidões descritas no Item '+C4+' perderem a sua validade jurídica, devido ao atraso na assinatura do contrato, a parte que der causa irá arcar com as despesas de novas certidões atualizadas.\n\nAs despesas de transferência oriundas do presente negócio, Cartório de notas para lavratura da escritura, Cartório de Registro de Imóveis e o pagamento do Imposto de Transmissão de Bens Imóveis (ITBI) serão suportados '+peloC+despExc+'.\n\nAinda as partes têm ciência que, havendo algum apontamento insolúvel junto às certidões descritas na cláusula '+C4+', sejam pessoais ou sobre o imóvel, o sinal ora recebido será devolvido '+aoC+' integralmente, no prazo de até 48 (quarenta e oito) horas.\n\n\nDA IMISSÃO NA POSSE:\n\n'+C5+') '+OC+' '+serC+' na posse do imóvel '+ptrig+dmTxt+'.\n\n'+C6+') O imóvel deve ser entregue livre e desimpedido de pessoas e coisas de quaisquer naturezas (exceto as listadas na cláusula '+C2+').\n\n'+C7+') O atraso na imissão '+doC+' na posse do imóvel importará em multa a ser paga '+peloV+' '+aoC+', em valor equivalente a 1,5% (hum e meio por cento) do valor do imóvel por cada período de 30 dias do atraso, calculados pro rata dia.\n\n\nDAS DESPESAS — entrega das chaves:\n\n'+C8+') Todos os impostos, taxas, tarifas, contribuições, multas e despesas que recaiam ou venham a recair sobre o Imóvel, com fato gerador até a data da entrega das chaves, serão de responsabilidade exclusiva '+doV+'. Caberá '+aoC+', a partir da data do recebimento destas, o pagamento de todos os impostos, taxas, tarifas e despesas que incidam ou venham a incidir sobre o imóvel, cujo fato gerador seja posterior à entrega das chaves.\n\n\nDAS OBRIGAÇÕES:\n\n'+C9+') O presente é firmado em caráter irrevogável e irretratável, obrigando-se as partes por si, seus herdeiros ou sucessores, a qualquer título, a cumprir as obrigações ora assumidas no presente Instrumento Particular.\n\n- Havendo inexecução deste Instrumento Particular por desistência '+doC+', '+esteC+' perderá em favor '+doV+' o sinal (descrito na cláusula III-A) ora recebido. Por outro lado, se a inexecução ocorrer por desistência '+doV+', '+esteV+' será obrigado a devolver o valor do sinal (descrito na cláusula III-A) recebido, mais o seu equivalente, nos moldes do artigo 420 do Código Civil Brasileiro de 2002, '+aoC+' em um prazo de até 72 horas da comunicação da inexecução.'+laudOb+averbCasTxt+'\n\n'+C10+') '+regTxt+clausEsp+'\n\n\nDOS HONORÁRIOS DE CORRETAGEM:\n\n'+CC+') '+corrTxt+'\n\n\nDAS DISPOSIÇÕES FINAIS:\n\n'+CD1+') Os Contratantes se obrigam a cumprir fielmente todos os termos e condições deste contrato, tornando sem efeito qualquer outro documento que divirja do seu conteúdo.\n\n'+CD2+') O presente instrumento só terá validade jurídica após o pagamento integral do valor do sinal descrito na cláusula III-A, que deverá ser pago em até 48 (quarenta e oito) horas, contadas a partir da assinatura deste instrumento.\n\n'+CD3+') As partes elegem o foro da Comarca da cidade do Rio de Janeiro para dirimir todas as dúvidas ou questões porventura advindas do presente, com renúncia expressa a qualquer outro.\n\nE, por estarem assim justos e contratados, assinam o presente eletronicamente, na presença de duas testemunhas abaixo assinadas.\n\nRio de Janeiro, '+dia+' de '+mes+' de '+ano+'.\n\n\n'+sigs;
 
-  lastMinutaTxt=txt;
-document.getElementById('rb').innerHTML=textToHtml(txt);
+  document.getElementById('rb').innerHTML=textToHtml(txt);
   document.getElementById('resblk').style.display='block';
   document.getElementById('nav').style.display='none';
   document.querySelectorAll('.step').forEach(function(s){s.classList.remove('on');});
@@ -797,33 +829,6 @@ function getMoveisTxt(){
   return lines.join('\n').trim();
 }
 
-
-function gerarDocx(){
-  if(!lastMinutaTxt){alert('Gere a minuta primeiro.');return;}
-  var btn=document.getElementById('btn-docx');
-  var orig=btn.textContent;
-  btn.textContent='Gerando...';btn.disabled=true;
-  var rua=g('irua')||'imovel',apto=g('iapto')||'apto';
-  var fname='minuta_'+rua.replace(/\s+/g,'_')+'_'+apto+'.docx';
-  fetch('/api/docx',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({text:lastMinutaTxt,filename:fname})
-  }).then(function(r){
-    if(!r.ok)return r.json().then(function(e){throw new Error(e.error||'Erro no servidor');});
-    return r.blob();
-  }).then(function(blob){
-    var url=URL.createObjectURL(blob);
-    var a=document.createElement('a');a.href=url;a.download=fname;
-    document.body.appendChild(a);a.click();
-    document.body.removeChild(a);URL.revokeObjectURL(url);
-  }).catch(function(e){
-    alert('Erro ao gerar Word: '+e.message);
-  }).finally(function(){
-    btn.textContent=orig;btn.disabled=false;
-  });
-}
-
 upd();
 </script>
 <datalist id="orgaos-rg">
@@ -839,6 +844,48 @@ upd();
 <option value="SSP/RS">
 <option value="SSP/GO">
 <option value="SSP/DF">
+</datalist>
+
+<datalist id="dl-prof-m">
+<option value="advogado"><option value="médico"><option value="engenheiro">
+<option value="engenheiro civil"><option value="arquiteto"><option value="empresário">
+<option value="aposentado"><option value="servidor público"><option value="professor">
+<option value="administrador"><option value="contador"><option value="psicólogo">
+<option value="dentista"><option value="farmacêutico"><option value="corretor de imóveis">
+<option value="economista"><option value="jornalista"><option value="militar">
+<option value="investidor"><option value="comerciante"><option value="autônomo">
+<option value="analista de sistemas"><option value="funcionário público">
+</datalist>
+<datalist id="dl-prof-f">
+<option value="advogada"><option value="médica"><option value="engenheira">
+<option value="engenheira civil"><option value="arquiteta"><option value="empresária">
+<option value="aposentada"><option value="servidora pública"><option value="professora">
+<option value="administradora"><option value="contadora"><option value="psicóloga">
+<option value="dentista"><option value="farmacêutica"><option value="corretora de imóveis">
+<option value="economista"><option value="jornalista"><option value="militar">
+<option value="investidora"><option value="comerciante"><option value="autônoma">
+<option value="analista de sistemas"><option value="funcionária pública">
+</datalist>
+
+<datalist id="dl-prof-m">
+<option value="advogado"><option value="médico"><option value="engenheiro">
+<option value="engenheiro civil"><option value="arquiteto"><option value="empresário">
+<option value="aposentado"><option value="servidor público"><option value="professor">
+<option value="administrador"><option value="contador"><option value="psicólogo">
+<option value="dentista"><option value="farmacêutico"><option value="corretor de imóveis">
+<option value="economista"><option value="jornalista"><option value="militar">
+<option value="investidor"><option value="comerciante"><option value="autônomo">
+<option value="analista de sistemas"><option value="funcionário público">
+</datalist>
+<datalist id="dl-prof-f">
+<option value="advogada"><option value="médica"><option value="engenheira">
+<option value="engenheira civil"><option value="arquiteta"><option value="empresária">
+<option value="aposentada"><option value="servidora pública"><option value="professora">
+<option value="administradora"><option value="contadora"><option value="psicóloga">
+<option value="dentista"><option value="farmacêutica"><option value="corretora de imóveis">
+<option value="economista"><option value="jornalista"><option value="militar">
+<option value="investidora"><option value="comerciante"><option value="autônoma">
+<option value="analista de sistemas"><option value="funcionária pública">
 </datalist>
 </body>
 </html>
