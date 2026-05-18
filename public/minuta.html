@@ -604,582 +604,37 @@ async function extrairImovel(){
   var btn=document.getElementById('btn-ext-im');
   var st=document.getElementById('st-im');
   btn.disabled=true;btn.textContent='Extraindo...';st.textContent='';
+  var lbls={iptu:'Carnê ou boleto de IPTU (inscrição municipal, endereço completo, número do apartamento)',mat:'Matrícula do imóvel no RGI (número da matrícula, ofício/cartório, endereço, bairro)'};
+  var merged={};
   try{
-    var content=[];
-    var lbls={iptu:'Carnê ou documento de IPTU (inscrição municipal, endereço completo do imóvel, número do apartamento)',mat:'Matrícula do imóvel no Cartório de Registro de Imóveis (número da matrícula, número do ofício/cartório, endereço, bairro)'};
-    for(var k in docs){
-      var file=docs[k],r64=await fileToB64(file);
+    for(var key in docs){
+      st.textContent='Lendo documento...';
+      var file=docs[key];
+      var r64=await fileToB64(file);
+      var content=[];
       if(r64.mt==='application/pdf'){content.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:r64.data}});}
       else{content.push({type:'image',source:{type:'base64',media_type:r64.mt,data:r64.data}});}
-      content.push({type:'text',text:'[Documento: '+lbls[k]+']'});
+      content.push({type:'text',text:'[Documento: '+lbls[key]+']'});
+      content.push({type:'text',text:'Extraia os dados do imóvel e retorne APENAS JSON sem markdown:\n{\n"rua":"nome da rua sem número ex: Rua Senador Vergueiro",\n"numPredio":"APENAS o número do prédio na rua ex: 56",\n"apto":"APENAS os dígitos do apartamento ex: 201 — NÃO escreva a palavra APARTAMENTO",\n"bairro":"nome do bairro",\n"matricula":"número da matrícula",\n"oficio":"número do ofício do cartório",\n"iptu":"inscrição IPTU"\n}\nUse string vazia para campos não encontrados. Retorne SOMENTE o JSON.'});
+      var resp=await fetch('/api/proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:400,messages:[{role:'user',content}]})});
+      var data=await resp.json();
+      if(data.error)throw new Error(typeof data.error==='string'?data.error:(data.error.message||JSON.stringify(data.error)));
+      var txt=(data.content||[]).find(function(b){return b.type==='text';});
+      if(!txt)throw new Error('Sem resposta');
+      var clean=txt.text.replace(/```json|```/g,'').trim();
+      var parsed=JSON.parse(clean);
+      for(var k in parsed){if(parsed[k]&&parsed[k]!=='')merged[k]=parsed[k];}
     }
-    content.push({type:'text',text:'Extraia os dados do imóvel e retorne APENAS JSON válido sem markdown:\n{\n"rua":"nome da rua sem número ex: Rua Senador Vergueiro",\n"numPredio":"APENAS o número do prédio na rua ex: 56 ou 901 (é o número da porta do prédio)",\n"apto":"APENAS os dígitos do apartamento ex: 201 ou 1004 — NÃO escreva a palavra APARTAMENTO",\n"bairro":"nome do bairro",\n"matricula":"número da matrícula ex: 260.000",\n"oficio":"número do ofício do cartório ex: 9",\n"iptu":"inscrição do IPTU ex: 06935787"\n}\nSe dado não encontrado use string vazia. Retorne SOMENTE o JSON.'});
-    var resp=await fetch('/api/proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:500,messages:[{role:'user',content}]})});
-    var data=await resp.json();
-    var txt=(data.content||[]).find(function(b){return b.type==='text';});
-    if(data.error)throw new Error(typeof data.error==='string'?data.error:(data.error.message||JSON.stringify(data.error)));
-    if(!txt)throw new Error('Sem resposta: '+JSON.stringify(data).slice(0,200));
-    var clean=txt.text.replace(/```json|```/g,'').trim();
-    var d=JSON.parse(clean);
     function set(id,val){var el=document.getElementById(id);if(el&&val)el.value=val;}
-    set('irua',   d.rua);
-    set('inpred', d.numPredio);
-    set('iapto',  d.apto);
-    set('ibairro',d.bairro);
-    set('imat',   d.matricula);
-    set('iofic',  d.oficio);
-    set('iiptu',  d.iptu);
+    set('irua',merged.rua);set('inpred',merged.numPredio);set('iapto',merged.apto);
+    set('ibairro',merged.bairro);set('imat',merged.matricula);
+    set('iofic',merged.oficio);set('iiptu',merged.iptu);
     st.textContent='✓ Preenchido — revise antes de continuar';
     st.style.color='var(--am)';
   }catch(e){
-    st.textContent='Erro: '+e.message;
-    st.style.color='var(--dg)';
+    st.textContent='Erro: '+e.message;st.style.color='var(--dg)';
   }
   btn.disabled=false;btn.textContent='Extrair e preencher ↗';
-}
-
-async function extrairPreencher(prefix){
-  var docs=docsCache[prefix]||{};
-  if(!Object.keys(docs).length){alert('Faça upload de ao menos um documento.');return;}
-  var btn=document.getElementById('btn-ext-'+prefix);
-  var st=document.getElementById('st-'+prefix);
-  btn.disabled=true;btn.textContent='Extraindo...';st.textContent='';
-  try{
-    var content=[];
-    var lbls={cnh:'CNH (nome completo, CPF, RG, data de nascimento, filiação)',res:'Comprovante de residência (endereço completo)',cert:'Certidão de nascimento ou casamento (estado civil, cônjuge se casado)'};
-    for(var k in docs){
-      var file=docs[k],r64=await fileToB64(file);
-      if(r64.mt==='application/pdf'){content.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:r64.data}});}
-      else{content.push({type:'image',source:{type:'base64',media_type:r64.mt,data:r64.data}});}
-      content.push({type:'text',text:'[Documento: '+lbls[k]+']'});
-    }
-    content.push({type:'text',text:'Extraia os dados e retorne APENAS JSON válido sem markdown:\n{\n"nome":"NOME EM MAIÚSCULAS",\n"sexo":"m ou f",\n"nacionalidade":"brasileiro ou brasileira",\n"estadoCivil":"solteiro|casado|divorciado|viuvo|separado",\n"profissao":"profissão em minúsculas",\n"rg":"APENAS os dígitos do RG ex: 20772235",\n"rgOrgao":"APENAS o órgão ex: DETRAN/RJ ou IFP/RJ",\n"cpf":"CPF formatado",\n"email":"ou vazio",\n"endereco":"endereço completo",\n"anuente":{"nome":"","sexo":"f","nacionalidade":"brasileiro","rg":"APENAS dígitos do RG + órgão no campo rgOrgao","rgOrgao":"ex: IFP/RJ","cpf":"","email":"","regime":"OBRIGATÓRIO - extraia da certidão ex: comunhão parcial de bens"} ou null se não casado\n}\nSe dado não encontrado use string vazia. Retorne SOMENTE o JSON.'});
-    var resp=await fetch('/api/proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:1000,messages:[{role:'user',content}]})});
-    var data=await resp.json();
-    var txt=(data.content||[]).find(function(b){return b.type==='text';});
-    if(data.error)throw new Error(typeof data.error==='string'?data.error:(data.error.message||JSON.stringify(data.error)));
-    if(!txt)throw new Error('Sem resposta: '+JSON.stringify(data).slice(0,200));
-    var clean=txt.text.replace(/```json|```/g,'').trim();
-    var parsed=JSON.parse(clean);
-    preencherCampos(prefix,parsed);
-    st.textContent='✓ Preenchido — revise antes de continuar';
-    st.style.color='var(--am)';
-  }catch(e){
-    st.textContent='Erro: '+e.message;
-    st.style.color='var(--dg)';
-  }
-  btn.disabled=false;btn.textContent='Extrair e preencher ↗';
-}
-
-function preencherCampos(prefix,d){
-  function set(id,val){var el=document.getElementById(id);if(el&&val)el.value=val;}
-  // Nome
-  set(prefix+'n', d.nome);
-  // Sexo — click the radio
-  if(d.sexo){
-    var sBtn=document.querySelector('[onclick*="sr(this,\''+prefix+'s\',\''+d.sexo+'\'"]');
-    if(sBtn)sBtn.click();
-    else{RV[prefix+'s']=d.sexo;updProfNac(prefix,d.sexo);}
-  }
-  // Campos simples
-  set(prefix+'nac', d.nacionalidade);
-  set(prefix+'prof', d.profissao);
-  set(prefix+'rg',  d.rg);
-  set(prefix+'rgo', d.rgOrgao);
-  set(prefix+'cpf', d.cpf);
-  set(prefix+'em',  d.email);
-  set(prefix+'end', d.endereco);
-  // Estado civil (select)
-  var ecEl=document.getElementById(prefix+'ec');
-  if(ecEl&&d.estadoCivil){ecEl.value=d.estadoCivil;ecEl.dispatchEvent(new Event('change'));}
-  // Anuente (só vendedor 1)
-  if(d.anuente&&d.anuente.nome&&prefix==='v1'){
-    set('v1an',  d.anuente.nome);
-    set('v1aNac',d.anuente.nacionalidade||'brasileiro');
-    var aRgFull=(d.anuente.rg||'')+(d.anuente.rgOrgao?' '+d.anuente.rgOrgao:'');
-    set('v1aRg', aRgFull);
-    set('v1aCpf',d.anuente.cpf);
-    set('v1aEm', d.anuente.email);
-    // Regime (select)
-    var regEl=document.getElementById('v1aReg');
-    if(regEl&&d.anuente.regime){
-      var rv2=d.anuente.regime.toLowerCase();
-      ['comunhão parcial de bens','comunhão universal de bens','separação total de bens'].forEach(function(opt){
-        if(rv2.indexOf(opt.split(' ').slice(0,2).join(' '))>-1)regEl.value=opt;
-      });
-    }
-    if(d.anuente.sexo){
-      var asBtn=document.querySelector('[onclick*="sr(this,\'v1as\',\''+d.anuente.sexo+'\'"]');
-      if(asBtn)asBtn.click();
-    }
-  }
-}
-
-function chkAnu(){
-  var isCasado=document.getElementById('v1ec').value==='casado';
-  var conjEhVendedor=rv('nv')==='2'&&v2Conjuges;
-  document.getElementById('blanu').style.display=(isCasado&&!conjEhVendedor)?'block':'none';
-}
-function chkC1R(){document.getElementById('blc1r').style.display=document.getElementById('c1ec').value==='casado'?'block':'none';}
-function mgb(v){document.getElementById('bpb').style.display=v==='dias'?'block':'none';document.getElementById('bpbc').style.display=v==='certs'?'block':'none';document.getElementById('bpba').style.display=v==='alv'?'block':'none';}
-function mmc(v){document.getElementById('blfgts').style.display=v==='fgts'?'block':'none';document.getElementById('blpb').style.display=v==='propb'?'block':'none';}
-function mmd(b){document.getElementById('blmd').style.display=b?'block':'none';}
-function mgp(v){document.getElementById('bldes').style.display=v==='escr'?'block':'none';}
-function mec(v){['met','prop','fin'].forEach(function(k){document.getElementById('inf-'+k).style.display=v===k?'block':'none';});var m=v==='met'&&tv('parc');document.getElementById('blp1v').style.display=m?'block':'none';document.getElementById('blp2v').style.display=m&&tv('p2')?'block':'none';document.getElementById('blhwv').style.display=m?'block':'none';}
-function mparc(){var m=rv('strC')==='met'&&tv('parc');document.getElementById('blp1v').style.display=m?'block':'none';document.getElementById('blhwv').style.display=m?'block':'none';}
-function mp2(){document.getElementById('blp2').style.display=tv('p2')?'block':'none';var m=rv('strC')==='met'&&tv('p2');document.getElementById('blp2v').style.display=m?'block':'none';}
-function mto(n){document.getElementById('t'+n+'c').style.display=document.getElementById('t'+n).value==='outro'?'block':'none';}
-
-function n2w(n){
-  if(n===0)return'zero';
-  var u=['','um','dois','três','quatro','cinco','seis','sete','oito','nove','dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'];
-  var d=['','','vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'];
-  var c=['','cento','duzentos','trezentos','quatrocentos','quinhentos','seiscentos','setecentos','oitocentos','novecentos'];
-  function g3(x){if(x===0)return null;if(x===100)return'cem';var p=[],h=Math.floor(x/100),r=x%100;if(h>0)p.push(c[h]);if(r>0){if(r<20)p.push(u[r]);else{var t=Math.floor(r/10),uu=r%10;if(t>0)p.push(d[t]);if(uu>0)p.push(u[uu]);}}return p.join(' e ');}
-  var mi=Math.floor(n/1e6),th=Math.floor((n%1e6)/1e3),re=n%1e3,p=[];
-  if(mi>0)p.push(g3(mi)+(mi===1?' milhão':' milhões'));
-  if(th>0)p.push((th===1?'um':g3(th))+' mil');
-  if(re>0)p.push(g3(re));
-  return p.join(' e ');
-}
-function exBRL(v){var n=Math.round(parseFloat(v)||0);if(n===0)return'[VALOR]';var w=n2w(n);if(Math.floor(n/1e6)>0&&n%1e6===0)return w+' de reais';return w+' reais';}
-function fBRL(v){return parseFloat(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
-function ex(i,o){var el=document.getElementById(o);if(el)el.value=exBRL(document.getElementById(i).value);}
-function calcHW(){var t=parseFloat(g('vcorr')||0),p1v1=parseFloat(g('p1v1')||0),p1v2=parseFloat(g('p1v2')||0),p2v1=parseFloat(g('p2v1')||0),p2v2=parseFloat(g('p2v2')||0),h1=t/2-p1v1-p2v1,h2=t/2-p1v2-p2v2;var e1=document.getElementById('hwv1'),e2=document.getElementById('hwv2');if(e1)e1.value='R$ '+fBRL(h1)+' — '+exBRL(h1);if(e2)e2.value='R$ '+fBRL(h2)+' — '+exBRL(h2);}
-
-function g(id){return(document.getElementById(id)||{}).value||'';}
-function g(id){var el=document.getElementById(id);return el?(el.value||'').trim():'';}
-function adj(s,m,f){return s==='f'?f:m;}
-function ecStr(v,s){var m={solteiro:'solteiro',casado:'casado',divorciado:'divorciado',viuvo:'viúvo',separado:'separado'},f={solteiro:'solteira',casado:'casada',divorciado:'divorciada',viuvo:'viúva',separado:'separada'};return(s==='f'?f:m)[v]||v;}
-
-function qv(n){
-  var px=n===1?'v1':'v2';
-  var nome=g(px+'n'),s=rv(px+'s')||'m',nac=(g(px+'nac')||(s==='f'?'brasileira':'brasileiro')).toLowerCase();
-  var ecv=ecStr(g(px+'ec')||'solteiro',s),prof=g(px+'prof').toLowerCase(),cpf=g(px+'cpf'),em=g(px+'em'),end=g(px+'end');
-  var port=adj(s,'portador','portadora'),insc=adj(s,'inscrito','inscrita'),res=adj(s,'residente e domiciliado','residente e domiciliada');
-  var doc='';
-  if(n===1&&tv('v1est')){doc='portador do passaporte nº '+g('v1pass')+' emitido por: '+g('v1passe');}
-  else{doc=port+' da Cédula de Identidade RG nº '+g(px+'rg')+' '+g(px+'rgo');}
-  var anu='';
-  if(n===1&&g('v1ec')==='casado'){
-    var as=rv('v1as')||'f',anac=g('v1aNac')||(as==='f'?'brasileira':'brasileiro');
-    var aport=adj(as,'portador','portadora'),ainsc=adj(as,'inscrito','inscrita'),aden=adj(as,'denominado','denominada');
-    anu='\nCasad'+adj(s,'o','a')+' sob o regime de '+g('v1aReg')+' com '+g('v1an')+', '+anac+', '+aport+' da identidade nº '+g('v1aRg')+', '+ainsc+' no CPF: '+g('v1aCpf')+', e-mail: '+g('v1aEm')+', doravante '+aden+' ANUENTE.';
-  }
-  var den=adj(s,'denominado','denominada');
-  return nome+', '+nac+', '+ecv+', '+prof+', '+doc+', '+insc+' no CPF sob o nº '+cpf+', e-mail: '+em+', '+res+(end?' '+end:'')+', doravante '+den+' OUTORGANTE'+anu;
-}
-
-function qc(n){
-  var px=n===1?'c1':'c2';
-  var nome=g(px+'n'),s=rv(px+'s')||'m',nac=(g(px+'nac')||(s==='f'?'brasileira':'brasileiro')).toLowerCase();
-  var ecv=ecStr(g(px+'ec')||'solteiro',s),prof=g(px+'prof').toLowerCase(),cpf=g(px+'cpf'),em=g(px+'em');
-  var end=g(px+'end')||(n===2?g('c1end'):'');
-  var port=adj(s,'portador','portadora'),insc=adj(s,'inscrito','inscrita'),res=adj(s,'residente e domiciliado','residente e domiciliada');
-  return nome+', '+nac+', '+ecv+', '+prof+', '+port+' da Cédula de Identidade nº '+g(px+'rg')+' – '+g(px+'rgo')+', '+insc+' no CPF sob o nº '+cpf+', e-mail: '+em+', '+res+(end?' '+end:'');
-}
-
-var CI=0;function rom(n){var v={M:1000,CM:900,D:500,CD:400,C:100,XC:90,L:50,XL:40,X:10,IX:9,V:5,IV:4,I:1},s='';for(var k in v){while(n>=v[k]){s+=k;n-=v[k];}}return s;}
-function nc(){return rom(++CI);}function resetCI(){CI=0;}
-
-function gerar(){
-  resetCI();
-  var nv=parseInt(rv('nv')||'1'),nc_=parseInt(rv('nc')||'1');
-  var v1s=rv('v1s')||'m',v2s=rv('v2s')||'m',c1s=rv('c1s')||'m',c2s=rv('c2s')||'m';
-  var vPl=nv>1,cPl=nc_>1;
-
-  var OV=vPl?'OS OUTORGANTES':adj(v1s,'O OUTORGANTE','A OUTORGANTE');
-  var ov=vPl?'os OUTORGANTES':adj(v1s,'o OUTORGANTE','a OUTORGANTE');
-  var doV=vPl?'dos OUTORGANTES':adj(v1s,'do OUTORGANTE','da OUTORGANTE');
-  var aoV=vPl?'aos OUTORGANTES':adj(v1s,'ao OUTORGANTE','à OUTORGANTE');
-  var peloV=vPl?'pelos OUTORGANTES':adj(v1s,'pelo OUTORGANTE','pela OUTORGANTE');
-  var decV=vPl?'declaram':'declara';
-  var comV=vPl?'comprometem-se':'compromete-se';
-  var esteV=vPl?'estes':adj(v1s,'este','esta');
-
-  var OC=cPl?'OS OUTORGADOS':adj(c1s,'O OUTORGADO','A OUTORGADA');
-  var oc=cPl?'os OUTORGADOS':adj(c1s,'o OUTORGADO','a OUTORGADA');
-  var doC=cPl?'dos OUTORGADOS':adj(c1s,'do OUTORGADO','da OUTORGADA');
-  var aoC=cPl?'aos OUTORGADOS':adj(c1s,'ao OUTORGADO','à OUTORGADA');
-  var peloC=cPl?'pelos OUTORGADOS':adj(c1s,'pelo OUTORGADO','pela OUTORGADA');
-  var decC=vPl?'declaram':'declara';
-  var vistC=cPl?'vistoriaram':'vistoriou';
-  var acC=cPl?'aceitam':'aceita';
-  var serC=cPl?'serão imitidos':adj(c1s,'será imitido','será imitida');
-  var esteC=cPl?'estes':adj(c1s,'este','esta');
-
-  var laudemio=tv('laudemio'),senhorio=g('senhorio'),prazoAlv=g('prazoAlv')||'30';
-  var financAtivo=tv('financAtivo'),bancoF=g('bancoF'),contratoF=g('contratoF'),saldoF=g('saldoF');
-  var averbCas=tv('averbCas'),averbObi=tv('averbObi'),bDest=tv('bDest');
-
-  var apto=g('iapto'),rua=g('irua'),npred=g('inpred'),bairro=g('ibairro'),mat=g('imat'),ofic=g('iofic'),iptu=g('iiptu');
-  var movTxtGerado=getMoveisTxt();
-
-  var vT=parseFloat(g('vtot')||0),vA=parseFloat(g('va')||0),vB=parseFloat(g('vb')||0),vC=parseFloat(g('vc')||0);
-  var gatB=rv('gatB')||'dias',prazoB=g('prazoB')||'60';
-  var modC=rv('modC')||'fin';
-  var vFgts=parseFloat(g('vfgts')||0),vFinc=parseFloat(g('vfinc')||0),prazoCD=g('prazoCD')||'60',dataEsc=g('dataEsc');
-  var multa=rv('multa')||'pct',mdia=g('mdia')||'500';
-
-  var banco=g('banco')==='__outro__'?g('bancoOutro'):g('banco'),agenc=g('agenc'),conta=g('conta'),pix_=g('pix');
-  var dadosB='o Banco '+banco+', agência '+agenc+', C/C '+conta+', PIX: '+pix_;
-
-  var gatP=rv('gatP')||'prot',pzPos=g('pzPos')||'2',dataEscP=g('dataEscP'),datMin=g('datMin');
-
-  var vCorr=parseFloat(g('vcorr')||0),strC=rv('strC')||'met',parc=tv('parc');
-  var p1n=g('p1n'),p1cj=g('p1cj'),p1v1=parseFloat(g('p1v1')||0),p1v2=parseFloat(g('p1v2')||0);
-  var p2n=g('p2n'),p2cj=g('p2cj'),p2v1=parseFloat(g('p2v1')||0),p2v2=parseFloat(g('p2v2')||0);
-  var hwV1=vCorr/2-p1v1-p2v1,hwV2=vCorr/2-p1v2-p2v2;
-
-  var dia=g('dia'),mes=g('mes'),ano=g('ano');
-  var t1el=document.getElementById('t1'),t2el=document.getElementById('t2');
-  var test1=t1el.value==='outro'?g('t1c'):t1el.value;
-  var test2=t2el.value==='outro'?g('t2c'):t2el.value;
-
-  var vTit=nv===1?adj(v1s,'OUTORGANTE PROMITENTE VENDEDOR','OUTORGANTE PROMITENTE VENDEDORA'):'OUTORGANTES PROMITENTES VENDEDORES';
-  var cTit=nc_===1?adj(c1s,'OUTORGADO PROMITENTE COMPRADOR','OUTORGADA PROMITENTE COMPRADORA'):'OUTORGADOS PROMITENTES COMPRADORES';
-
-  var vQ='',cQ='';
-  if(nv===1){vQ=qv(1);}
-  else{
-    var v2rc=g('v2regCas');
-    if(v2rc){var cas=v1s==='f'&&v2s==='f'?'casadas':'casados';vQ=qv(1).replace(/,\s*doravante.*OUTORGANTE(\n.*ANUENTE\.)?/,'')+', e '+qv(2).replace(/,\s*doravante.*OUTORGANTE.*/,'')+', '+cas+' pelo regime de '+v2rc+' e residentes e domiciliados no Rio de Janeiro, doravante denominados OUTORGANTES';}
-    else{vQ=qv(1)+';\n'+qv(2);}
-  }
-  if(nc_===1){cQ=qc(1)+', doravante '+adj(c1s,'denominado','denominada')+' OUTORGADO';}
-  else{
-    var c2rc=g('c2regCas');
-    if(c2rc){var casc=c1s==='f'&&c2s==='f'?'casadas':'casados',resc=c1s==='f'&&c2s==='f'?'residentes e domiciliadas':'residentes e domiciliados';cQ=qc(1)+', e '+qc(2)+', '+casc+' pelo regime de '+c2rc+' e '+resc+(g('c1end')?' '+g('c1end'):'')+', doravante denominados OUTORGADOS';}
-    else{cQ=qc(1)+', doravante '+adj(c1s,'denominado','denominada')+' OUTORGADO, e '+qc(2)+', doravante '+adj(c2s,'denominado','denominada')+adj(c2s,' OUTORGADO',' OUTORGADA')+', doravante denominados OUTORGADOS';}
-  }
-
-  var C1=nc(),C2=nc(),C3=nc();
-  var ftxt=laudemio?', foreiro ao '+senhorio:'';
-  var grav=financAtivo?' com exceção do saldo do financiamento junto à '+bancoF+', contrato nº '+contratoF+', no valor atual de R$ '+fBRL(saldoF)+' ('+exBRL(saldoF)+')':'';
-  var movRef=movTxtGerado?'obrigando-se '+ov+' a conservá-los e entregá-los nas mesmas condições quando da vistoria realizada, nesta data. Ficam as fotos do site www.imoveisdescolados.com.br como referência.':'obrigando-se '+ov+' a conservá-lo e entregá-lo nas mesmas condições quando da vistoria realizada, nesta data. Ficam as fotos do site www.imoveisdescolados.com.br como referência.';
-  var incMov=movTxtGerado?'incluindo os móveis e objetos listados abaixo, ':'';
-
-  var pATxt=C3+'-A) R$ '+fBRL(vA)+' ('+exBRL(vA)+'), a título de sinal e princípio de pagamento, a serem pagos no ato da assinatura do presente instrumento, através de transferência bancária em nome '+doV+' para '+dadosB+'.';
-
-  var pBtrig='';
-  if(gatB==='dias')pBtrig='no ato da assinatura do Contrato Particular de Compra e Venda com Alienação Fiduciária, com força de escritura pública, que deverá ocorrer em até '+prazoB+' ('+n2w(parseInt(prazoB))+') dias após a assinatura deste instrumento';
-  else if(gatB==='certs')pBtrig='após a apresentação das certidões negativas listadas no item '+C2;
-  else pBtrig='no ato da assinatura do Contrato Particular de Compra e Venda com Alienação Fiduciária, com força de escritura pública, que deverá ser assinado em até 30 (trinta) dias contados a partir da obtenção do alvará de venda do '+senhorio;
-  var pBdest=bDest&&financAtivo?' Os referidos recursos deverão ser destinados obrigatória e exclusivamente '+peloC+' à quitação do saldo devedor do financiamento imobiliário vinculado ao imóvel objeto deste instrumento, contrato nº '+contratoF+', junto à '+bancoF+', como condição para a liberação do gravame e transferência do bem livre e desembaraçado '+aoC+'.':'';
-  var pBTxt=C3+'-B) R$ '+fBRL(vB)+' ('+exBRL(vB)+'), por meio de uma parcela fixa e irreajustável, a serem pagos com recursos próprios, '+pBtrig+', através de PIX ou transferência bancária em nome '+doV+' para '+dadosB+'.'+pBdest+' O atraso no pagamento desta parcela importará em multa a ser paga '+peloC+' '+aoV+', em valor equivalente a 1,5% (hum e meio por cento) do saldo remanescente por cada período de 30 dias do atraso, calculados pro rata die.';
-
-  var prt5d='Fica acertado que, tão logo se encontre assinado e celebrado o contrato particular de compra e venda com alienação fiduciária com força de escritura pública, '+oc+' terão um prazo máximo de 5 (cinco) dias úteis para apresentá-lo para registro perante o cartório competente, devendo fornecer cópia do protocolo cartorário '+aoV+'.';
-  var multDt=multa==='dia'?'O não cumprimento dos prazos ora estabelecidos implicará na incidência de multa diária no valor de R$ '+fBRL(mdia)+' ('+exBRL(mdia)+') por dia de atraso, até o efetivo cumprimento da obrigação. ':'';
-  var pCTxt='';
-  if(modC==='fin')pCTxt=C3+'-C) R$ '+fBRL(vC)+' ('+exBRL(vC)+') a serem pagos '+peloC+' por meio de recursos de financiamento imobiliário nos moldes da instituição financeira financiadora, ou seja, após o efetivo registro do contrato de financiamento imobiliário com força de escritura pública. O efetivo registro é providência a cargo e às expensas '+doC+', que deverá fornecer '+aoV+' uma cópia do instrumento registrado. '+prt5d+' '+multDt+'Tão logo o contrato particular de compra e venda com alienação fiduciária com força de escritura pública esteja registrado na matrícula do imóvel, caberá a instituição financeira transferir o valor para a conta '+doV+' em '+dadosB+'.';
-  else if(modC==='fgts')pCTxt=C3+'-C) R$ '+fBRL(vC)+' ('+exBRL(vC)+') a serem pagos '+peloC+' por meio de recursos do FGTS (aproximadamente R$ '+fBRL(vFgts)+') e de financiamento imobiliário (aproximadamente R$ '+fBRL(vFinc)+') nos moldes da instituição financeira financiadora, após o efetivo registro do contrato de financiamento imobiliário com força de escritura pública. A divisão dos valores é aproximada, uma vez que dependerá do valor efetivo do FGTS para liberação, comprometendo-se, neste ato, '+oc+' à integralização do saldo com financiamento bancário, independentemente do valor existente nas contas do FGTS. O efetivo registro é providência a cargo e às expensas '+doC+', que deverá fornecer '+aoV+' uma cópia do instrumento registrado. '+prt5d+' '+multDt+'Tão logo o contrato particular de compra e venda com alienação fiduciária com força de escritura pública esteja registrado na matrícula do imóvel, caberá a instituição financeira transferir o valor para a conta '+doV+' em '+dadosB+'.';
-  else if(modC==='cons')pCTxt=C3+'-C) R$ '+fBRL(vC)+' ('+exBRL(vC)+') a serem pagos '+peloC+' por meio de recursos de carta de crédito de consórcio contemplada, destinada à aquisição do imóvel objeto deste instrumento, após o efetivo registro do Contrato Particular de Compra e Venda com Alienação Fiduciária, com força de escritura pública. O efetivo registro é providência a cargo e às expensas '+doC+', que deverá fornecer '+aoV+' uma cópia do instrumento registrado. '+prt5d+' Tão logo o contrato particular de compra e venda com alienação fiduciária com força de escritura pública esteja registrado na matrícula do imóvel, caberá a instituição financeira transferir o valor para a conta '+doV+' em '+dadosB+'.';
-  else if(modC==='propb')pCTxt=C3+'-C) R$ '+fBRL(vC)+' ('+exBRL(vC)+'), por meio de uma parcela fixa e irreajustável, a serem pagos com recursos próprios, após a baixa da alienação fiduciária junto ao '+ofic+'º Registro Geral de Imóveis, no ato da assinatura da escritura definitiva de compra e venda'+(dataEsc?', a qual deverá ocorrer em '+dataEsc:'')+', mediante PIX ou transferência bancária em nome '+doV+' para '+dadosB+'. O atraso no pagamento desta parcela importará em multa equivalente a 1,5% (um e meio por cento) do valor desta parcela por cada período de 30 (trinta) dias de atraso, calculados pro rata die.';
-  else pCTxt=C3+'-C) R$ '+fBRL(vC)+' ('+exBRL(vC)+'), por meio de uma parcela fixa e irreajustável, a serem pagos com recursos próprios'+(dataEsc?', no ato da assinatura da escritura definitiva em '+dataEsc:'')+', mediante PIX ou transferência bancária em nome '+doV+' para '+dadosB+'.';
-
-  var C4=nc();
-  var alvItem=laudemio?' e alvará de venda emitido pelo '+senhorio:'';
-  var prazoEC=laudemio?'30':'15';
-  var despExc='';
-  if(laudemio)despExc=', com exceção da taxa de Laudêmio e eventuais foros atrasados que deverão ser pagos '+peloV;
-  if(financAtivo)despExc+='. Incumbirá exclusivamente '+aoV+', às suas expensas, o pagamento de todas as custas e emolumentos relativos ao registro do Termo de Quitação do financiamento junto ao '+ofic+'º Registro Geral de Imóveis, com a consequente baixa da alienação fiduciária';
-
-  var C5=nc(),C6=nc(),C7=nc();
-  var ptrig='';
-  if(gatP==='prot')ptrig='em até '+pzPos+' ('+n2w(parseInt(pzPos))+') dias úteis da apresentação do protocolo de prenotação do Registro perante o Cartório de Registro de Imóveis competente';
-  else if(gatP==='c3')ptrig='em até '+pzPos+' ('+n2w(parseInt(pzPos))+') dias do recebimento dos valores descritos no item III-C deste instrumento';
-  else ptrig='no dia da assinatura da escritura definitiva'+(dataEscP?', '+dataEscP:'');
-  var dmTxt=datMin?', mas não antes de '+datMin:'';
-
-  var C8=nc(),C9=nc();
-  var laudOb=laudemio?'\n\n- A obrigação de obtenção do alvará emitido pelo '+senhorio+' após o pagamento do Laudêmio é de responsabilidade '+doV+' e esse deve ser emitido em até '+prazoAlv+' dias após o recebimento do pagamento do item III-A.':'';
-  var averbCasTxt=averbCas?'\n\n- Fica ajustado que o pedido de averbação do casamento na matrícula do imóvel é de obrigação '+doV+'. Esta obrigação deverá estar concluída em até 30 dias. Caso sofra algum atraso, o prazo determinado na cláusula III-B também poderá sofrer atraso, sem punição, do mesmo período de tempo.':'';
-
-  var C10=nc();
-  var regTxt='';
-  if(modC==='fgts')regTxt='Fica ajustado que a assinatura do contrato particular de compra e venda com alienação fiduciária com força de escritura pública deverá acontecer em no máximo '+prazoCD+' ('+n2w(parseInt(prazoCD))+') dias úteis contados a partir da assinatura deste compromisso. O atraso na assinatura importará em multa a ser paga '+peloC+' '+aoV+', em valor equivalente a 1,5% (hum e meio por cento) do valor do imóvel por cada período de 30 dias do atraso, calculados pro rata dia. O pedido de registro deverá ser protocolado perante o '+ofic+'º Ofício do Registro de Imóveis no prazo de até 5 (cinco) dias úteis, contados da data da assinatura do presente contrato. O não cumprimento deste prazo implicará na incidência de multa diária no valor de R$ '+fBRL(mdia)+' ('+exBRL(mdia)+') por dia de atraso, a cargo e às expensas '+doC+'.';
-  else regTxt='Fica ajustado que o pedido de registro do contrato definitivo deverá ser protocolado '+peloC+' perante o '+ofic+'º Ofício do Registro de Imóveis no prazo de até 5 (cinco) dias úteis, contados da data da assinatura do citado instrumento, bem como, em igual prazo, em caso de eventuais exigências formuladas pelo referido Cartório, para a prática do citado Registro, a cargo e às expensas '+doC+'.';
-
-  var clausEsp='';
-  if(financAtivo&&!bDest){var Cf=nc();clausEsp+='\n\n'+Cf+') '+OV+' se obriga, como condição essencial para a realização da escritura definitiva de compra e venda, a promover junto à '+bancoF+' a quitação integral do financiamento imobiliário vinculado ao imóvel objeto deste instrumento, contrato nº '+contratoF+', e a providenciar, às suas exclusivas expensas, o Termo de Quitação e o seu registro perante o '+ofic+'º Cartório de Registro Geral de Imóveis, com a consequente baixa da alienação fiduciária, em prazo suficiente para que a escritura definitiva seja lavrada.';}
-  if(averbObi){var Co=nc();clausEsp+='\n\n'+Co+') '+OC+' se obriga, como condição essencial para a realização da escritura definitiva de compra e venda, a providenciar, às suas exclusivas expensas, a averbação da certidão de óbito de seu cônjuge junto ao Cartório de Registro Civil competente, com a consequente atualização de seu estado civil na certidão de casamento, em prazo suficiente para que a escritura definitiva seja lavrada.';}
-
-  var CC=nc();
-  var HW_CNPJ='46.367.985/0001-99';
-  var corrTxt='';
-  if(!parc){
-    if(strC==='met'){var half=vCorr/2;corrTxt='As Partes reconhecem a empresa HW Assessoria Imobiliária Ltda CNPJ '+HW_CNPJ+' como intermediadora do presente negócio, fazendo jus ao recebimento da quantia de R$ '+fBRL(vCorr)+' ('+exBRL(vCorr)+') a ser paga '+peloV+', como honorários de corretagem, cujo recebimento será feito em 2 parcelas iguais no valor de R$ '+fBRL(half)+' ('+exBRL(half)+') cada, sendo a primeira no ato da assinatura deste instrumento (após a compensação do valor descrito no item III-A na conta '+doV+') e a segunda no ato da escritura definitiva (após a compensação do valor descrito no item III-B na conta '+doV+').';}
-    else if(strC==='prop')corrTxt='As Partes reconhecem a empresa HW Assessoria Imobiliária Ltda CNPJ '+HW_CNPJ+' como intermediadora do presente negócio, fazendo jus ao recebimento da quantia de R$ '+fBRL(vCorr)+' ('+exBRL(vCorr)+') a ser paga '+peloV+', como honorários de corretagem. O pagamento será realizado de forma proporcional, correspondendo a 5% (cinco por cento) sobre cada valor recebido '+peloV+', conforme descrito nos itens III-A, III-B e III-C do presente instrumento, sendo devido e exigível o pagamento de cada parcela da corretagem imediatamente após o recebimento, '+peloV+', do respectivo valor a que se refere cada item.';
-    else corrTxt='As Partes reconhecem a empresa HW Assessoria Imobiliária Ltda CNPJ '+HW_CNPJ+' como intermediadora do presente negócio, fazendo jus ao recebimento da quantia de R$ '+fBRL(vCorr)+' ('+exBRL(vCorr)+') a ser paga '+peloV+', como honorários de corretagem, cujo recebimento será feito em parcela única, no ato do recebimento do valor descrito no item III-C.';
-  } else {
-    var pnms='HW Assessoria Imobiliária Ltda CNPJ '+HW_CNPJ;
-    if(p1n)pnms+=', '+p1n+' CNPJ '+p1cj;
-    if(p2n&&tv('p2'))pnms+=' e '+p2n+' CNPJ '+p2cj;
-    if(strC==='met'){
-      var half=vCorr/2,d1='',d2='';
-      if(p1n){d1+=', sendo R$ '+fBRL(hwV1)+' ('+exBRL(hwV1)+') para HW Assessoria Imobiliária Ltda CNPJ '+HW_CNPJ+' e R$ '+fBRL(p1v1)+' ('+exBRL(p1v1)+') para '+p1n+' CNPJ '+p1cj;d2+=', sendo R$ '+fBRL(hwV2)+' ('+exBRL(hwV2)+') para HW Assessoria Imobiliária Ltda CNPJ '+HW_CNPJ+' e R$ '+fBRL(p1v2)+' ('+exBRL(p1v2)+') para '+p1n+' CNPJ '+p1cj;}
-      if(p2n&&tv('p2')){d1+=' e R$ '+fBRL(p2v1)+' ('+exBRL(p2v1)+') para '+p2n+' CNPJ '+p2cj;d2+=' e R$ '+fBRL(p2v2)+' ('+exBRL(p2v2)+') para '+p2n+' CNPJ '+p2cj;}
-      corrTxt='As Partes reconhecem a empresa '+pnms+' ("Imobiliárias") como intermediadores do presente negócio, fazendo jus ao recebimento da quantia de R$ '+fBRL(vCorr)+' ('+exBRL(vCorr)+') a ser paga '+peloV+', como honorários de corretagem, cujo recebimento será feito em 2 parcelas iguais no valor de R$ '+fBRL(half)+' ('+exBRL(half)+') cada, sendo a primeira no ato da assinatura deste instrumento (após o recebimento '+peloV+' do valor descrito na cláusula III-A)'+d1+' e a segunda no recebimento do valor descrito no item III-B'+d2+'.';
-    }else if(strC==='prop')corrTxt='As Partes reconhecem a empresa '+pnms+' ("Imobiliárias") como intermediadores do presente negócio, fazendo jus ao recebimento da quantia de R$ '+fBRL(vCorr)+' ('+exBRL(vCorr)+') a ser paga '+peloV+', como honorários de corretagem. O pagamento será realizado de forma proporcional, correspondendo a 5% (cinco por cento) sobre cada valor recebido '+peloV+', conforme descrito nos itens III-A, III-B e III-C do presente instrumento.';
-    else corrTxt='As Partes reconhecem a empresa '+pnms+' ("Imobiliárias") como intermediadores do presente negócio, fazendo jus ao recebimento da quantia de R$ '+fBRL(vCorr)+' ('+exBRL(vCorr)+') a ser paga '+peloV+', como honorários de corretagem, cujo recebimento será feito em parcela única, no ato do recebimento do valor descrito no item III-C.';
-  }
-  corrTxt+='\n\nFica previamente acordado entre as partes que se por qualquer motivo o item III-A tenha que ser devolvido '+peloV+', a IMOBILIÁRIA terá até 48 (quarenta e oito) horas para devolver a primeira parcela dos honorários de corretagem.';
-
-  var CD1=nc(),CD2=nc(),CD3=nc();
-
-  var sigs='________________________________________________________________________________\n\n'+adj(v1s,'OUTORGANTE','OUTORGANTE')+' — '+g('v1n').toUpperCase()+'\n';
-  if(g('v1ec')==='casado'&&g('v1an'))sigs+='\n________________________________________________________________________________\n\nANUENTE — '+g('v1an').toUpperCase()+'\n';
-  if(nv===2&&g('v2n'))sigs+='\n________________________________________________________________________________\n\nOUTORGANTE — '+g('v2n').toUpperCase()+'\n';
-  sigs+='\n________________________________________________________________________________\n\nOUTORGAD'+adj(c1s,'O','A')+' — '+g('c1n').toUpperCase()+'\n';
-  if(nc_===2&&g('c2n'))sigs+='\n________________________________________________________________________________\n\nOUTORGAD'+adj(c2s,'O','A')+' — '+g('c2n').toUpperCase()+'\n';
-  sigs+='\n_________________________________________________________________________________\n\nTestemunha 1 — '+test1+'\n\n_________________________________________________________________________________\n\nTestemunha 2 — '+test2;
-
-  var movTxt=movTxtGerado?'\n\n'+movTxtGerado:'';
-
-  var txt='INSTRUMENTO PARTICULAR DE PROMESSA DE COMPRA E VENDA DE IMÓVEL IRRETRATÁVEL E IRREVOGÁVEL COM CLÁUSULA RESOLUTIVA, na forma abaixo, que entre si fazem:\n\n'+vTit+': '+vQ+';\n\n'+cTit+': '+cQ+'.\n\nAssim, pelo presente instrumento e nos melhores termos legais, ajustam os contratantes a venda do imóvel descrito na cláusula a seguir.\n\n\nDO OBJETO:\n\n'+C1+') Imóvel constituído pelo apartamento '+apto+' da '+rua+', '+npred+' – '+bairro+' – Rio de Janeiro/RJ. O imóvel encontra-se devidamente descrito e caracterizado na matrícula nº '+mat+' do '+ofic+'º Ofício do Registro de Imóveis, desta comarca, inscrição do IPTU n° '+iptu+ftxt+'.\n\n\nDA SITUAÇÃO DO OBJETO:\n\n'+C2+') '+OV+' '+decV+' que o referido imóvel se encontra livre e desembaraçado de todos e quaisquer ônus, tanto de natureza pessoal ou real, judicial ou extrajudicial, bem como que o imóvel não possui arrestos ou sequestros ou outras medidas expropriatórias, impostos, tarifas, taxas, contribuições e débitos de qualquer natureza, não tendo '+ov+' conhecimento de qualquer outra situação, quer pessoal ou relativa ao imóvel, que possa, de alguma forma, ser empecilho para presente negociação ou pôr em risco ou agravar ou onerar a situação do imóvel'+(grav?grav+'.':'.')+'\n\n'+decC.charAt(0).toUpperCase()+decC.slice(1)+' '+oc+' que '+vistC+' o imóvel e que '+acC+' recebê-lo no estado em que se encontra, '+incMov+movRef+movTxt+'\n\n\nDO VALOR DA VENDA:\n\n'+C3+') '+OV+' '+comV+' a vender, em caráter irrevogável e irretratável, '+aoC+' o dito imóvel pelo preço total de R$ '+fBRL(vT)+' ('+exBRL(vT)+'), conforme as condições abaixo estipuladas:\n\n'+pATxt+'\n\n'+pBTxt+'\n\n'+pCTxt+'\n\n\nDAS CERTIDÕES:\n\nAs certidões descritas na cláusula '+C4+' abaixo, deverão ser entregues '+peloV+' '+aoC+' em até '+prazoEC+' ('+n2w(parseInt(prazoEC))+') dias da assinatura do presente instrumento.\n\n'+C4+') Correrão por conta '+doV+' as seguintes certidões negativas do foro do Rio de Janeiro – RJ. São elas: do 1º e 2º Ofícios de Interdições e Tutelas, 2º Ofício de Registro de Distribuição da Capital (pesquisa cível e fazendária), Certidão Fiscal Estadual, Certidão negativa da Justiça Federal e Trabalhista, Ônus Reais atualizada, Quitação Fiscal imobiliária e Enfitêutica, certidão do 2º Ofício Distribuidor (referente ao Imóvel e '+aoV+'), declaração de quitação condominial com firma reconhecida, Taxa de Incêndio (FUNESBOM), Certidão negativa de tributos federais fornecida pela Secretaria da Receita Federal/Ministério da Fazenda, cópias autenticadas de cédula de identidade, cartão de inscrição no CPF e certidão de casamento/nascimento atualizada nos últimos 180 dias'+alvItem+'.\n\nEM TEMPO – Na hipótese das certidões descritas no Item '+C4+' perderem a sua validade jurídica, devido ao atraso na assinatura do contrato, a parte que der causa irá arcar com as despesas de novas certidões atualizadas.\n\nAs despesas de transferência oriundas do presente negócio, Cartório de notas para lavratura da escritura, Cartório de Registro de Imóveis e o pagamento do Imposto de Transmissão de Bens Imóveis (ITBI) serão suportados '+peloC+despExc+'.\n\nAinda as partes têm ciência que, havendo algum apontamento insolúvel junto às certidões descritas na cláusula '+C4+', sejam pessoais ou sobre o imóvel, o sinal ora recebido será devolvido '+aoC+' integralmente, no prazo de até 48 (quarenta e oito) horas.\n\n\nDA IMISSÃO NA POSSE:\n\n'+C5+') '+OC+' '+serC+' na posse do imóvel '+ptrig+dmTxt+'.\n\n'+C6+') O imóvel deve ser entregue livre e desimpedido de pessoas e coisas de quaisquer naturezas (exceto as listadas na cláusula '+C2+').\n\n'+C7+') O atraso na imissão '+doC+' na posse do imóvel importará em multa a ser paga '+peloV+' '+aoC+', em valor equivalente a 1,5% (hum e meio por cento) do valor do imóvel por cada período de 30 dias do atraso, calculados pro rata dia.\n\n\nDAS DESPESAS — entrega das chaves:\n\n'+C8+') Todos os impostos, taxas, tarifas, contribuições, multas e despesas que recaiam ou venham a recair sobre o Imóvel, com fato gerador até a data da entrega das chaves, serão de responsabilidade exclusiva '+doV+'. Caberá '+aoC+', a partir da data do recebimento destas, o pagamento de todos os impostos, taxas, tarifas e despesas que incidam ou venham a incidir sobre o imóvel, cujo fato gerador seja posterior à entrega das chaves.\n\n\nDAS OBRIGAÇÕES:\n\n'+C9+') O presente é firmado em caráter irrevogável e irretratável, obrigando-se as partes por si, seus herdeiros ou sucessores, a qualquer título, a cumprir as obrigações ora assumidas no presente Instrumento Particular.\n\n- Havendo inexecução deste Instrumento Particular por desistência '+doC+', '+esteC+' perderá em favor '+doV+' o sinal (descrito na cláusula III-A) ora recebido. Por outro lado, se a inexecução ocorrer por desistência '+doV+', '+esteV+' será obrigado a devolver o valor do sinal (descrito na cláusula III-A) recebido, mais o seu equivalente, nos moldes do artigo 420 do Código Civil Brasileiro de 2002, '+aoC+' em um prazo de até 72 horas da comunicação da inexecução.'+laudOb+averbCasTxt+'\n\n'+C10+') '+regTxt+clausEsp+'\n\n\nDOS HONORÁRIOS DE CORRETAGEM:\n\n'+CC+') '+corrTxt+'\n\n\nDAS DISPOSIÇÕES FINAIS:\n\n'+CD1+') Os Contratantes se obrigam a cumprir fielmente todos os termos e condições deste contrato, tornando sem efeito qualquer outro documento que divirja do seu conteúdo.\n\n'+CD2+') O presente instrumento só terá validade jurídica após o pagamento integral do valor do sinal descrito na cláusula III-A, que deverá ser pago em até 48 (quarenta e oito) horas, contadas a partir da assinatura deste instrumento.\n\n'+CD3+') As partes elegem o foro da Comarca da cidade do Rio de Janeiro para dirimir todas as dúvidas ou questões porventura advindas do presente, com renúncia expressa a qualquer outro.\n\nE, por estarem assim justos e contratados, assinam o presente eletronicamente, na presença de duas testemunhas abaixo assinadas.\n\nRio de Janeiro, '+dia+' de '+mes+' de '+ano+'.\n\n\n'+sigs;
-
-  lastMinutaTxt=txt;
-document.getElementById('rb').innerHTML=textToHtml(txt);
-  document.getElementById('resblk').style.display='block';
-  document.getElementById('nav').style.display='none';
-  document.querySelectorAll('.step').forEach(function(s){s.classList.remove('on');});
-  document.getElementById('resblk').scrollIntoView({behavior:'smooth',block:'start'});
-}
-
-
-function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-
-function boldLine(line){
-  var t=line.trim();
-  if(!t)return'';
-  // Title
-  if(/^INSTRUMENTO PARTICULAR/.test(t)) return '<strong>'+line+'</strong>';
-  // Section headers
-  var hdrs=['DO OBJETO:','DA SITUAÇÃO DO OBJETO:','DO VALOR DA VENDA:','DAS CERTIDÕES:',
-    'DA IMISSÃO NA POSSE:','DAS DESPESAS','DAS OBRIGAÇÕES:','DOS HONORÁRIOS DE CORRETAGEM:',
-    'DAS DISPOSIÇÕES FINAIS:','EM TEMPO'];
-  if(hdrs.some(function(h){return t.indexOf(h)===0;})) return '<strong>'+line+'</strong>';
-  // Party role titles (bold up to and including colon)
-  line=line.replace(/^(OUTORGANTE[S]? PROMITENTE[S]? [^:]+:)/,'<strong>$1</strong>');
-  line=line.replace(/^(OUTORGADO[S]? PROMITENTE[S]? [^:]+:)/,'<strong>$1</strong>');
-  // Roman numeral clause number at start
-  line=line.replace(/^([IVXLCDM]+\)) /,function(m,rn){return '<strong>'+rn+'</strong> ';});
-  // Role names as standalone tokens
-  line=line.replace(/\b(OUTORGANTE[S]?|OUTORGADO[S]?|OUTORGADA[S]?|ANUENTE)\b/g,'<strong>$1</strong>');
-  // Signature separator lines — keep as-is
-  return line;
-}
-
-function textToHtml(txt){
-  var paras=esc(txt).split('\n\n');
-  var out=paras.map(function(para){
-    if(!para.trim())return'';
-    var lines=para.split('\n');
-    var processed=lines.map(function(l){return boldLine(l);}).filter(function(l){return l!=='';});
-    if(!processed.length)return'';
-    var t=lines[0].trim();
-    var isSec=['DO OBJETO','DA SITUAÇÃO','DO VALOR','DAS CERTIDÕES','DA IMISSÃO','DAS DESPESAS',
-      'DAS OBRIGAÇÕES','DOS HONORÁRIOS','DAS DISPOSIÇÕES','EM TEMPO','INSTRUMENTO PARTICULAR']
-      .some(function(h){return t.indexOf(h)===0;});
-    var cls=isSec?'sec':'';
-    return '<p'+(cls?' class="'+cls+'"':'')+'>'+ processed.join('<br>') +'</p>';
-  }).filter(Boolean);
-  return out.join('\n');
-}
-
-function copiar(){
-  var rb=document.getElementById('rb');
-  var htmlContent='<html><body>'+rb.innerHTML+'</body></html>';
-  var plain=rb.innerText;
-  try{
-    navigator.clipboard.write([new ClipboardItem({
-      'text/html':new Blob([htmlContent],{type:'text/html'}),
-      'text/plain':new Blob([plain],{type:'text/plain'})
-    })]).then(function(){
-      var b=document.querySelector('.bcp'),o=b.textContent;
-      b.textContent='Copiado ✓';setTimeout(function(){b.textContent=o;},2000);
-    });
-  }catch(e){
-    navigator.clipboard.writeText(plain).then(function(){
-      var b=document.querySelector('.bcp'),o=b.textContent;
-      b.textContent='Copiado ✓';setTimeout(function(){b.textContent=o;},2000);
-    });
-  }
-}
-
-
-// ─── Checklist de moveis ───
-var COMODOS=[
-  {id:'sala',nome:'SALA',itens:['Marcenaria planejada','Armario planejado','Projeto de iluminacao','Luminarias','Ar condicionado tipo split','Cortinas','Persianas','Rack / painel de TV']},
-  {id:'cozinha',nome:'COZINHA',itens:['Armarios planejados','Metais','Cooktop','Coifa','Forno embutido','Geladeira','Micro-ondas','Lava-loucas','Bancada em granito/marmore']},
-  {id:'areaserv',nome:'AREA DE SERVICO / BANHEIRO DE SERVICO',itens:['Loucas e metais','Marcenaria planejada','Varal','Aquecedor a gas','Armario de servico']},
-  {id:'quarto1',nome:'QUARTO 1',itens:['Moveis planejados','Armario planejado','Iluminacao','Cortinas','Cortina blackout','Ar condicionado tipo split','Cabeceira planejada','Bancada planejada']},
-  {id:'quarto2',nome:'QUARTO 2',itens:['Moveis planejados','Armario planejado','Iluminacao','Cortinas','Cortina blackout','Ar condicionado tipo split','Cabeceira planejada','Bancada planejada']},
-  {id:'suite',nome:'SUITE',itens:['Armarios e moveis planejados','Iluminacao','Cortinas','Cortina blackout','Ar condicionado tipo split','Sapateira','Cabeceira planejada']},
-  {id:'bansoc',nome:'BANHEIRO SOCIAL',itens:['Loucas e metais','Espelhos','Armarios planejados','Box Blindex']},
-  {id:'bansuite',nome:'BANHEIRO DA SUITE',itens:['Loucas e metais','Espelhos','Armarios planejados','Box Blindex']},
-  {id:'varanda',nome:'VARANDA / SACADA',itens:['Armario','Churrasqueira','Climatizador','Cortina de vidro']},
-  {id:'lavabo',nome:'LAVABO',itens:['Loucas e metais','Espelho','Armario planejado']}
-];
-
-// Labels com acento para exibicao no contrato
-var COMODOS_LABELS={
-  sala:'SALA',cozinha:'COZINHA',areaserv:'AREA DE SERVICO / BANHEIRO DE SERVICO',
-  quarto1:'QUARTO 1',quarto2:'QUARTO 2',suite:'SUITE',
-  bansoc:'BANHEIRO SOCIAL',bansuite:'BANHEIRO DA SUITE',
-  varanda:'VARANDA / SACADA',lavabo:'LAVABO'
-};
-var ITENS_LABELS={
-  'Marcenaria planejada':'Marcenaria planejada',
-  'Armario planejado':'Armário planejado',
-  'Projeto de iluminacao':'Projeto de iluminação',
-  'Luminarias':'Luminárias',
-  'Ar condicionado tipo split':'Ar condicionado tipo split',
-  'Cortinas':'Cortinas','Persianas':'Persianas','Rack / painel de TV':'Rack / painel de TV',
-  'Armarios planejados':'Armários planejados','Metais':'Metais','Cooktop':'Cooktop',
-  'Coifa':'Coifa','Forno embutido':'Forno embutido','Geladeira':'Geladeira',
-  'Micro-ondas':'Micro-ondas','Lava-loucas':'Lava-louças','Bancada em granito/marmore':'Bancada em granito/mármore',
-  'Loucas e metais':'Louças e metais','Varal':'Varal','Aquecedor a gas':'Aquecedor a gás',
-  'Armario de servico':'Armário de serviço',
-  'Moveis planejados':'Móveis planejados','Iluminacao':'Iluminação',
-  'Cortina blackout':'Cortina blackout','Cabeceira planejada':'Cabeceira planejada',
-  'Bancada planejada':'Bancada planejada',
-  'Armarios e moveis planejados':'Armários e móveis planejados','Sapateira':'Sapateira',
-  'Espelhos':'Espelhos','Box Blindex':'Box Blindex','Armario':'Armário',
-  'Churrasqueira':'Churrasqueira','Climatizador':'Climatizador','Cortina de vidro':'Cortina de vidro',
-  'Espelho':'Espelho'
-};
-
-var mvState={};
-COMODOS.forEach(function(c){mvState[c.id]={on:false,chk:{},custom:[]};});
-
-function renderMoveis(){
-  if(!TV['moveis'])return;
-  var el=document.getElementById('mvlista');
-  el.innerHTML='';
-  COMODOS.forEach(function(c){
-    var s=mvState[c.id];
-    var wrap=document.createElement('div');wrap.className='mvroom';
-    // Header
-    var hd=document.createElement('div');hd.className='mvroom-hd';
-    var sw2=document.createElement('div');sw2.className='sw'+(s.on?' on':'');
-    var lblHd=document.createElement('label');lblHd.textContent=COMODOS_LABELS[c.id]||c.nome;
-    lblHd.style.cssText='font-family:Arial,sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--tx);flex:1;cursor:pointer';
-    hd.appendChild(sw2);hd.appendChild(lblHd);
-    hd.onclick=function(){s.on=!s.on;sw2.classList.toggle('on',s.on);body.classList.toggle('open',s.on);};
-    // Body
-    var body=document.createElement('div');body.className='mvroom-body'+(s.on?' open':'');
-    var itemsDiv=document.createElement('div');itemsDiv.className='mvitems';
-    // Preset items
-    c.itens.forEach(function(item){
-      if(s.chk[item]===undefined)s.chk[item]=false;
-      var tag=document.createElement('div');tag.className='mvchk'+(s.chk[item]?' on':'');
-      tag.textContent=ITENS_LABELS[item]||item;
-      tag.onclick=function(){s.chk[item]=!s.chk[item];tag.classList.toggle('on',s.chk[item]);};
-      itemsDiv.appendChild(tag);
-    });
-    // Custom items
-    s.custom.forEach(function(item,idx){
-      var tag=document.createElement('div');tag.className='mvchk on';
-      var txt=document.createTextNode(item);tag.appendChild(txt);
-      var x=document.createElement('span');x.textContent=' x';
-      x.style.cssText='margin-left:4px;opacity:.5;font-size:10px;cursor:pointer;font-weight:700';
-      (function(cid,i){x.onclick=function(e){e.stopPropagation();mvState[cid].custom.splice(i,1);renderMoveis();};})(c.id,idx);
-      tag.appendChild(x);
-      itemsDiv.appendChild(tag);
-    });
-    body.appendChild(itemsDiv);
-    // Add row
-    var addRow=document.createElement('div');addRow.className='mv-add-row';
-    var inp=document.createElement('input');inp.type='text';inp.placeholder='Adicionar item personalizado...';
-    var btn=document.createElement('button');btn.className='mv-add-btn';btn.textContent='+ item';
-    btn.onclick=function(){var v=inp.value.trim();if(!v)return;s.custom.push(v);inp.value='';renderMoveis();};
-    inp.onkeydown=function(e){if(e.key==='Enter'){btn.click();}};
-    addRow.appendChild(inp);addRow.appendChild(btn);
-    body.appendChild(addRow);
-    wrap.appendChild(hd);wrap.appendChild(body);
-    el.appendChild(wrap);
-  });
-}
-
-function getMoveisTxt(){
-  if(!TV['moveis'])return'';
-  var lines=[];
-  COMODOS.forEach(function(c){
-    var s=mvState[c.id];
-    if(!s.on)return;
-    var itens=c.itens.filter(function(i){return s.chk[i];}).map(function(i){return ITENS_LABELS[i]||i;});
-    itens=itens.concat(s.custom||[]);
-    if(itens.length===0)return;
-    lines.push(COMODOS_LABELS[c.id]||c.nome);
-    itens.forEach(function(i){lines.push(i);});
-    lines.push('');
-  });
-  return lines.join('\n').trim();
-}
-
-var v2MesmoEnd=false,v2Conjuges=false,c2MesmoEnd=false,c2Conjuges=false;
-
-function togV2(tipo){
-  if(tipo==='res'){v2MesmoEnd=!v2MesmoEnd;document.getElementById('sw-v2res').classList.toggle('on',v2MesmoEnd);document.getElementById('blk-v2-res').style.display=v2MesmoEnd?'none':'block';}
-  if(tipo==='conj'){v2Conjuges=!v2Conjuges;document.getElementById('sw-v2conj').classList.toggle('on',v2Conjuges);document.getElementById('blk-v2-cert').style.display=v2Conjuges?'none':'block';chkAnu();}
-}
-function togC2(tipo){
-  if(tipo==='res'){c2MesmoEnd=!c2MesmoEnd;document.getElementById('sw-c2res').classList.toggle('on',c2MesmoEnd);document.getElementById('blk-c2-res').style.display=c2MesmoEnd?'none':'block';}
-  if(tipo==='conj'){c2Conjuges=!c2Conjuges;document.getElementById('sw-c2conj').classList.toggle('on',c2Conjuges);document.getElementById('blk-c2-cert').style.display=c2Conjuges?'none':'block';}
-}
-
-async function extrairParceiroInterno(prefix,outro,mesmoEnd,conjuges,btnId,stId){
-  var cnh=docsCache[prefix]&&docsCache[prefix]['cnh'];
-  if(!cnh){alert('Faca upload da CNH do '+prefix+'.');return;}
-  var btn=document.getElementById(btnId),st=document.getElementById(stId);
-  btn.disabled=true;btn.textContent='Extraindo...';st.textContent='';
-  try{
-    var content=[];
-    var r64=await fileToB64(cnh);
-    if(r64.mt==='application/pdf')content.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:r64.data}});
-    else content.push({type:'image',source:{type:'base64',media_type:r64.mt,data:r64.data}});
-    content.push({type:'text',text:'[CNH do segundo contratante]'});
-    if(!mesmoEnd&&docsCache[prefix]&&docsCache[prefix]['res']){
-      var rf=docsCache[prefix]['res'],rb64=await fileToB64(rf),rmt=rf.type||'image/jpeg';
-      if(rmt==='application/pdf')content.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:rb64}});
-      else content.push({type:'image',source:{type:'base64',media_type:rmt,data:rb64}});
-      content.push({type:'text',text:'[Comprovante de residencia do segundo contratante]'});
-    }
-    var certFile=null;
-    if(conjuges&&docsCache[outro]&&docsCache[outro]['cert'])certFile=docsCache[outro]['cert'];
-    else if(!conjuges&&docsCache[prefix]&&docsCache[prefix]['cert'])certFile=docsCache[prefix]['cert'];
-    if(certFile){
-      var cr64=await fileToB64(certFile);
-      if(cr64.mt==='application/pdf')content.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:cr64.data}});
-      else content.push({type:'image',source:{type:'base64',media_type:cr64.mt,data:cr64.data}});
-      content.push({type:'text',text:'[Certidao de casamento do casal - extraia o regime de bens]'});
-    }
-    var conjInstr=conjuges?'"regimeBens":"regime de bens OBRIGATORIO - sempre consta na certidao de casamento ex: comunhao parcial de bens ou comunhao universal de bens ou separacao total de bens",' :'';
-    content.push({type:'text',text:'Extraia os dados e retorne APENAS JSON valido sem markdown:\n{\n"nome":"NOME EM MAIUSCULAS",\n"sexo":"m ou f",\n"nacionalidade":"brasileiro ou brasileira",\n"estadoCivil":"solteiro|casado|divorciado|viuvo|separado",\n"profissao":"profissao em minusculas",\n"rg":"APENAS os dígitos do RG ex: 20772235",\n"rgOrgao":"APENAS o órgão ex: DETRAN/RJ ou IFP/RJ",\n"cpf":"CPF formatado",\n"email":"ou vazio",\n"endereco":"endereco completo ou vazio",\n'+conjInstr+'\n"_ok":true\n}\nRetorne SOMENTE o JSON.'});
-    var resp=await fetch('/api/proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:800,messages:[{role:'user',content}]})});
-    var data=await resp.json();
-    if(data.error)throw new Error(typeof data.error==='string'?data.error:(data.error.message||JSON.stringify(data.error)));
-    var txt=(data.content||[]).find(function(b){return b.type==='text';});
-    if(!txt)throw new Error('Sem resposta: '+JSON.stringify(data).slice(0,150));
-    var clean=txt.text.replace(/```json|```/g,'').trim();
-    var d=JSON.parse(clean);
-    preencherCampos(prefix,d);
-    if(mesmoEnd){var eEl=document.getElementById(prefix+'end');if(eEl)eEl.value=document.getElementById(outro+'end').value||'';}
-    if(conjuges&&d.regimeBens){
-      var regId=prefix[0]==='v'?'v2regCas':'c2regCas';
-      var regEl=document.getElementById(regId);
-      if(regEl){
-        var rv3=d.regimeBens.toLowerCase();
-        ['comunhao parcial de bens','comunhao universal de bens','separacao total de bens'].forEach(function(o){
-          if(rv3.indexOf(o.split(' ').slice(0,2).join(' '))>-1)regEl.value=o.replace('comunhao','comunhão').replace('separacao','separação');
-        });
-      }
-    }
-    st.textContent='Preenchido'+(conjuges?' (conjuge detectado)':'')+' - revise antes de continuar';
-    st.style.color='var(--am)';
-  }catch(e){st.textContent='Erro: '+e.message;st.style.color='var(--dg)';}
-  btn.disabled=false;btn.textContent='Extrair e preencher';
 }
 
 function extrairV2(){extrairParceiroInterno('v2','v1',v2MesmoEnd,v2Conjuges,'btn-ext-v2','st-v2');}
@@ -1270,4 +725,75 @@ upd();
 <option value="analista de sistemas"><option value="funcionária pública">
 </datalist>
 </body>
-</html>
+</htmlasync function extrairParceiroInterno(prefix,outro,mesmoEnd,conjuges,btnId,stId){
+  var cnh=docsCache[prefix]&&docsCache[prefix]['cnh'];
+  if(!cnh){alert('Faça upload da CNH.');return;}
+  var btn=document.getElementById(btnId),st=document.getElementById(stId);
+  btn.disabled=true;btn.textContent='Extraindo...';st.textContent='';
+  var merged={};
+  try{
+    // 1. CNH — sempre individual
+    st.textContent='Lendo CNH...';
+    var r64=await fileToB64(cnh);
+    var content=[];
+    if(r64.mt==='application/pdf')content.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:r64.data}});
+    else content.push({type:'image',source:{type:'base64',media_type:r64.mt,data:r64.data}});
+    content.push({type:'text',text:'Extraia dados da CNH e retorne APENAS JSON sem markdown:\n{\n"nome":"NOME EM MAIÚSCULAS",\n"sexo":"m ou f",\n"nacionalidade":"brasileiro ou brasileira",\n"profissao":"profissão em minúsculas ou vazio",\n"rg":"APENAS os dígitos do RG",\n"rgOrgao":"APENAS o órgão ex: DETRAN/RJ ou IFP/RJ",\n"cpf":"CPF formatado",\n"email":"email ou vazio"\n}\nRetorne SOMENTE o JSON.'});
+    var resp=await fetch('/api/proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:500,messages:[{role:'user',content}]})});
+    var data=await resp.json();
+    if(data.error)throw new Error(data.error.message||JSON.stringify(data.error));
+    var txt=(data.content||[]).find(function(b){return b.type==='text';});
+    var parsed=JSON.parse(txt.text.replace(/```json|```/g,'').trim());
+    for(var k in parsed){if(parsed[k]&&parsed[k]!=='')merged[k]=parsed[k];}
+
+    // 2. Comprovante — separado se não for mesmo endereço
+    if(!mesmoEnd&&docsCache[prefix]&&docsCache[prefix]['res']){
+      st.textContent='Lendo comprovante...';
+      var rf=docsCache[prefix]['res'],rr64=await fileToB64(rf);
+      var c2=[];
+      if(rr64.mt==='application/pdf')c2.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:rr64.data}});
+      else c2.push({type:'image',source:{type:'base64',media_type:rr64.mt,data:rr64.data}});
+      c2.push({type:'text',text:'Extraia o endereço completo deste comprovante de residência e retorne APENAS JSON sem markdown:\n{"endereco":"endereço completo"}\nRetorne SOMENTE o JSON.'});
+      var r2=await fetch('/api/proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:200,messages:[{role:'user',content:c2}]})});
+      var d2=await r2.json();
+      if(!d2.error){var t2=(d2.content||[]).find(function(b){return b.type==='text';});if(t2){var p2=JSON.parse(t2.text.replace(/```json|```/g,'').trim());if(p2.endereco)merged.endereco=p2.endereco;}}
+    }
+
+    // 3. Certidão — própria ou do cônjuge (casal)
+    var certFile=null;
+    if(conjuges&&docsCache[outro]&&docsCache[outro]['cert'])certFile=docsCache[outro]['cert'];
+    else if(!conjuges&&docsCache[prefix]&&docsCache[prefix]['cert'])certFile=docsCache[prefix]['cert'];
+    if(certFile){
+      st.textContent='Lendo certidão...';
+      var cr64=await fileToB64(certFile),c3=[];
+      if(cr64.mt==='application/pdf')c3.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:cr64.data}});
+      else c3.push({type:'image',source:{type:'base64',media_type:cr64.mt,data:cr64.data}});
+      c3.push({type:'text',text:'Extraia da certidão de casamento e retorne APENAS JSON sem markdown:\n{\n"estadoCivil":"casado",\n"regimeBens":"OBRIGATÓRIO — extraia o regime de bens ex: comunhão parcial de bens"\n}\nRetorne SOMENTE o JSON.'});
+      var r3=await fetch('/api/proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:200,messages:[{role:'user',content:c3}]})});
+      var d3=await r3.json();
+      if(!d3.error){var t3=(d3.content||[]).find(function(b){return b.type==='text';});if(t3){try{var p3=JSON.parse(t3.text.replace(/```json|```/g,'').trim());for(var k3 in p3){if(p3[k3])merged[k3]=p3[k3];}}catch(e2){}}}
+    }
+
+    preencherCampos(prefix,merged);
+
+    // Mesmo endereço: copiar do outro
+    if(mesmoEnd){var eEl=document.getElementById(prefix+'end');if(eEl)eEl.value=document.getElementById(outro+'end').value||'';}
+
+    // Cônjuges: preencher regime de bens
+    if(conjuges&&merged.regimeBens){
+      var regId=prefix[0]==='v'?'v2regCas':'c2regCas';
+      var regEl=document.getElementById(regId);
+      if(regEl){
+        var rv3=merged.regimeBens.toLowerCase();
+        ['comunhão parcial de bens','comunhão universal de bens','separação total de bens'].forEach(function(o){
+          if(rv3.replace(/[ãõçé]/g,function(c){return{ã:'a',õ:'o',ç:'c',é:'e'}[c]||c;}).indexOf(o.replace(/[ãõçé]/g,function(c){return{ã:'a',õ:'o',ç:'c',é:'e'}[c]||c;}).split(' ').slice(0,2).join(' '))>-1)regEl.value=o;
+        });
+      }
+    }
+
+    st.textContent='✓ Preenchido'+(conjuges?' — cônjuges detectados':'')+' — revise antes de continuar';
+    st.style.color='var(--am)';
+  }catch(e){st.textContent='Erro: '+e.message;st.style.color='var(--dg)';}
+  btn.disabled=false;btn.textContent='Extrair e preencher ↗';
+}
+
