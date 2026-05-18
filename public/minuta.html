@@ -480,233 +480,234 @@ footer{text-align:center;margin-top:2rem;font-family:Arial,sans-serif;font-size:
 <script>
 var cur=1,STEPS=8;
 var RV={nv:'1',nc:'1',v1s:'m',v2s:'m',c1s:'m',c2s:'m',v1as:'f',gatB:'dias',modC:'fin',multa:'pct',gatP:'prot',strC:'met'};
-var TV={};
-var lastMinutaTxt="";
+var TV={};var lastMinutaTxt='';var docsCache={};
+var v2MesmoEnd=false,v2Conjuges=false,c2MesmoEnd=false,c2Conjuges=false;
+var PROFS_PAIRS=[['advogado','advogada'],['médico','médica'],['engenheiro','engenheira'],['engenheiro civil','engenheira civil'],['arquiteto','arquiteta'],['empresário','empresária'],['aposentado','aposentada'],['servidor público','servidora pública'],['professor','professora'],['administrador','administradora'],['contador','contadora'],['psicólogo','psicóloga'],['farmacêutico','farmacêutica'],['corretor de imóveis','corretora de imóveis'],['economista','economista'],['jornalista','jornalista'],['militar','militar'],['investidor','investidora'],['comerciante','comerciante'],['autônomo','autônoma'],['analista de sistemas','analista de sistemas'],['funcionário público','funcionária pública'],['dentista','dentista']];
 
 function go(n){n=Math.max(1,Math.min(STEPS,n));document.getElementById('s'+cur).classList.remove('on');cur=n;document.getElementById('s'+cur).classList.add('on');upd();window.scrollTo({top:0,behavior:'smooth'});}
-
-function upd(){
-  var b=document.getElementById('prog');b.innerHTML='';
-  for(var i=1;i<=STEPS;i++){var d=document.createElement('div');d.className='ps'+(i<cur?' done':i===cur?' cur':'');b.appendChild(d);}
-  var L=['','Situações especiais','Vendedor(es)','Comprador(es)','Imóvel','Pagamento','Posse','Corretagem','Data e testemunhas'];
-  document.getElementById('plbl').textContent=L[cur]||'';
-  document.getElementById('sind').textContent='Passo '+cur+' de '+STEPS;
-  document.getElementById('bbk').style.visibility=cur===1?'hidden':'visible';
-  document.getElementById('bnx').style.display=cur===STEPS?'none':'inline-block';
-  document.getElementById('bge').style.display=cur===STEPS?'inline-block':'none';
-}
-
-function sr(el,k,v){
-  document.querySelectorAll('[onclick*="sr"][onclick*="\''+k+'\'"]').forEach(function(e){e.classList.remove('sel');});
-  el.classList.add('sel');RV[k]=v;
-}
+function upd(){var b=document.getElementById('prog');b.innerHTML='';for(var i=1;i<=STEPS;i++){var d=document.createElement('div');d.className='ps'+(i<cur?' done':i===cur?' cur':'');b.appendChild(d);}var L=['','Situações especiais','Vendedor(es)','Comprador(es)','Imóvel','Pagamento','Posse','Corretagem','Data e testemunhas'];document.getElementById('plbl').textContent=L[cur]||'';document.getElementById('sind').textContent='Passo '+cur+' de '+STEPS;document.getElementById('bbk').style.visibility=cur===1?'hidden':'visible';document.getElementById('bnx').style.display=cur===STEPS?'none':'inline-block';document.getElementById('bge').style.display=cur===STEPS?'inline-block':'none';}
+function sr(el,k,v){document.querySelectorAll('[onclick*="sr"][onclick*="\''+k+'\'"]').forEach(function(e){e.classList.remove('sel');});el.classList.add('sel');RV[k]=v;}
 function rv(k){return RV[k]||'';}
-
-function tg(k){
-  TV[k]=!TV[k];
-  var sw=document.getElementById('sw-'+k);
-  var cd=document.getElementById('cond-'+k);
-  if(sw)sw.classList.toggle('on',TV[k]);
-  if(cd)cd.classList.toggle('show',TV[k]);
-  if(k==='v1est'){document.getElementById('blv1rg').style.display=TV[k]?'none':'block';document.getElementById('cond-v1est').classList.toggle('show',TV[k]);}
-}
+function tg(k){TV[k]=!TV[k];var sw=document.getElementById('sw-'+k),cd=document.getElementById('cond-'+k);if(sw)sw.classList.toggle('on',TV[k]);if(cd)cd.classList.toggle('show',TV[k]);if(k==='v1est'){document.getElementById('blv1rg').style.display=TV[k]?'none':'block';document.getElementById('cond-v1est').classList.toggle('show',TV[k]);}}
 function tv(k){return TV[k]||false;}
-
 function mv2(b){document.getElementById('cv2').style.display=b?'block':'none';document.getElementById('ext-v2').style.display=b?'block':'none';}
 function mc2(b){document.getElementById('cc2').style.display=b?'block':'none';document.getElementById('ext-c2').style.display=b?'block':'none';}
-
-function chkBancoOutro(id){
-  var sel=document.getElementById(id);
-  var inp=document.getElementById(id+'Outro');
-  if(!inp)return;
-  inp.style.display=sel.value==='__outro__'?'block':'none';
-  if(sel.value!=='__outro__')inp.value='';
-}
-
-var PROFS_PAIRS=[
-  ['advogado','advogada'],['médico','médica'],['engenheiro','engenheira'],
-  ['engenheiro civil','engenheira civil'],['arquiteto','arquiteta'],
-  ['empresário','empresária'],['aposentado','aposentada'],
-  ['servidor público','servidora pública'],['professor','professora'],
-  ['administrador','administradora'],['contador','contadora'],
-  ['psicólogo','psicóloga'],['farmacêutico','farmacêutica'],
-  ['corretor de imóveis','corretora de imóveis'],['economista','economista'],
-  ['jornalista','jornalista'],['militar','militar'],['investidor','investidora'],
-  ['comerciante','comerciante'],['autônomo','autônoma'],
-  ['analista de sistemas','analista de sistemas'],
-  ['funcionário público','funcionária pública'],['dentista','dentista']
-];
-function updProfNac(prefix,sexo){
-  // Switch datalist
-  var inp=document.getElementById(prefix+'prof');
-  if(inp){
-    inp.setAttribute('list',sexo==='f'?'dl-prof-f':'dl-prof-m');
-    // If current value is a known profession, convert to correct gender
-    var cur=inp.value.trim().toLowerCase();
-    PROFS_PAIRS.forEach(function(p){
-      if(cur===p[0]||cur===p[1])inp.value=sexo==='f'?p[1]:p[0];
-    });
+function chkAnu(){var isCasado=document.getElementById('v1ec').value==='casado',conjEhV=rv('nv')==='2'&&v2Conjuges;document.getElementById('blanu').style.display=(isCasado&&!conjEhV)?'block':'none';}
+function chkC1R(){document.getElementById('blc1r').style.display=document.getElementById('c1ec').value==='casado'?'block':'none';}
+function mgb(v){document.getElementById('bpb').style.display=v==='dias'?'block':'none';document.getElementById('bpbc').style.display=v==='certs'?'block':'none';document.getElementById('bpba').style.display=v==='alv'?'block':'none';}
+function mmc(v){document.getElementById('blfgts').style.display=v==='fgts'?'block':'none';document.getElementById('blpb').style.display=v==='propb'?'block':'none';}
+function mmd(b){document.getElementById('blmd').style.display=b?'block':'none';}
+function mgp(v){document.getElementById('bldes').style.display=v==='escr'?'block':'none';}
+function mec(v){['met','prop','fin'].forEach(function(k){document.getElementById('inf-'+k).style.display=v===k?'block':'none';});var m=v==='met'&&tv('parc');document.getElementById('blp1v').style.display=m?'block':'none';document.getElementById('blhwv').style.display=m?'block':'none';}
+function mparc(){var m=rv('strC')==='met'&&tv('parc');document.getElementById('blp1v').style.display=m?'block':'none';document.getElementById('blhwv').style.display=m?'block':'none';}
+function mp2(){document.getElementById('blp2').style.display=tv('p2')?'block':'none';var m=rv('strC')==='met'&&tv('p2');document.getElementById('blp2v').style.display=m?'block':'none';}
+function mto(n){document.getElementById('t'+n+'c').style.display=document.getElementById('t'+n).value==='outro'?'block':'none';}
+function togV2(tipo){if(tipo==='res'){v2MesmoEnd=!v2MesmoEnd;document.getElementById('sw-v2res').classList.toggle('on',v2MesmoEnd);document.getElementById('blk-v2-res').style.display=v2MesmoEnd?'none':'block';}if(tipo==='conj'){v2Conjuges=!v2Conjuges;document.getElementById('sw-v2conj').classList.toggle('on',v2Conjuges);document.getElementById('blk-v2-cert').style.display=v2Conjuges?'none':'block';chkAnu();}}
+function togC2(tipo){if(tipo==='res'){c2MesmoEnd=!c2MesmoEnd;document.getElementById('sw-c2res').classList.toggle('on',c2MesmoEnd);document.getElementById('blk-c2-res').style.display=c2MesmoEnd?'none':'block';}if(tipo==='conj'){c2Conjuges=!c2Conjuges;document.getElementById('sw-c2conj').classList.toggle('on',c2Conjuges);document.getElementById('blk-c2-cert').style.display=c2Conjuges?'none':'block';}}
+function n2w(n){if(n===0)return'zero';var u=['','um','dois','três','quatro','cinco','seis','sete','oito','nove','dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'],d=['','','vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'],c=['','cento','duzentos','trezentos','quatrocentos','quinhentos','seiscentos','setecentos','oitocentos','novecentos'];function g3(x){if(x===0)return null;if(x===100)return'cem';var p=[],h=Math.floor(x/100),r=x%100;if(h>0)p.push(c[h]);if(r>0){if(r<20)p.push(u[r]);else{var t=Math.floor(r/10),uu=r%10;if(t)p.push(d[t]);if(uu)p.push(u[uu]);}}return p.join(' e ');}var mi=Math.floor(n/1e6),th=Math.floor((n%1e6)/1e3),re=n%1e3,p=[];if(mi>0)p.push(g3(mi)+(mi===1?' milhão':' milhões'));if(th>0)p.push((th===1?'um':g3(th))+' mil');if(re>0)p.push(g3(re));return p.join(' e ');}
+function exBRL(v){var n=Math.round(parseFloat(v)||0);if(!n)return'[VALOR]';var w=n2w(n);return(Math.floor(n/1e6)>0&&n%1e6===0)?w+' de reais':w+' reais';}
+function fBRL(v){return parseFloat(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function ext(i,o){var el=document.getElementById(o);if(el)el.value=exBRL(document.getElementById(i).value);}
+function calcHW(){var t=parseFloat(g('vcorr')||0),p1v1=parseFloat(g('p1v1')||0),p1v2=parseFloat(g('p1v2')||0),p2v1=parseFloat(g('p2v1')||0),p2v2=parseFloat(g('p2v2')||0);var h1=t/2-p1v1-p2v1,h2=t/2-p1v2-p2v2;var e1=document.getElementById('hwv1'),e2=document.getElementById('hwv2');if(e1)e1.value='R$ '+fBRL(h1)+' — '+exBRL(h1);if(e2)e2.value='R$ '+fBRL(h2)+' — '+exBRL(h2);}
+function g(id){var el=document.getElementById(id);return el?(el.value||'').trim():'';}
+function adj(s,m,f){return s==='f'?f:m;}
+function ecStr(v,s){var m={solteiro:'solteiro',casado:'casado',divorciado:'divorciado',viuvo:'viúvo',separado:'separado'},f={solteiro:'solteira',casado:'casada',divorciado:'divorciada',viuvo:'viúva',separado:'separada'};return(s==='f'?f:m)[v]||v;}
+function updProfNac(prefix,sexo){var inp=document.getElementById(prefix+'prof');if(inp){inp.setAttribute('list',sexo==='f'?'dl-prof-f':'dl-prof-m');var cur=inp.value.trim().toLowerCase();PROFS_PAIRS.forEach(function(p){if(cur===p[0]||cur===p[1])inp.value=sexo==='f'?p[1]:p[0];});}var nac=document.getElementById(prefix+'nac');if(nac){var cv=nac.value.trim().toLowerCase();if(!cv||cv==='brasileiro'||cv==='brasileira')nac.value=sexo==='f'?'brasileira':'brasileiro';}}
+function qv(n){var px=n===1?'v1':'v2';var nome=g(px+'n'),s=rv(px+'s')||'m',nac=(g(px+'nac')||(s==='f'?'brasileira':'brasileiro')).toLowerCase();var ecv=ecStr(g(px+'ec')||'solteiro',s),prof=g(px+'prof').toLowerCase(),cpf=g(px+'cpf'),em=g(px+'em'),end=g(px+'end');var port=adj(s,'portador','portadora'),insc=adj(s,'inscrito','inscrita'),res=adj(s,'residente e domiciliado','residente e domiciliada');var doc='';if(n===1&&tv('v1est')){doc='portador do passaporte nº '+g('v1pass')+' emitido por: '+g('v1passe');}else{doc=port+' da Cédula de Identidade RG nº '+g(px+'rg')+' '+g(px+'rgo');}var anu='';if(n===1&&g('v1ec')==='casado'){var as=rv('v1as')||'f',anac=g('v1aNac')||(as==='f'?'brasileira':'brasileiro');var aport=adj(as,'portador','portadora'),ainsc=adj(as,'inscrito','inscrita'),aden=adj(as,'denominado','denominada');anu='\nCasad'+adj(s,'o','a')+' sob o regime de '+g('v1aReg')+' com '+g('v1an')+', '+anac+', '+aport+' da identidade nº '+g('v1aRg')+', '+ainsc+' no CPF: '+g('v1aCpf')+', e-mail: '+g('v1aEm')+', doravante '+aden+' ANUENTE.';}return nome+', '+nac+', '+ecv+', '+prof+', '+doc+', '+insc+' no CPF sob o nº '+cpf+', e-mail: '+em+', '+res+(end?' '+end:'')+', doravante '+adj(s,'denominado','denominada')+' OUTORGANTE'+anu;}
+function qc(n){var px=n===1?'c1':'c2';var nome=g(px+'n'),s=rv(px+'s')||'m',nac=(g(px+'nac')||(s==='f'?'brasileira':'brasileiro')).toLowerCase();var ecv=ecStr(g(px+'ec')||'solteiro',s),prof=g(px+'prof').toLowerCase(),cpf=g(px+'cpf'),em=g(px+'em'),end=g(px+'end')||(n===2?g('c1end'):'');var port=adj(s,'portador','portadora'),insc=adj(s,'inscrito','inscrita'),res=adj(s,'residente e domiciliado','residente e domiciliada');return nome+', '+nac+', '+ecv+', '+prof+', '+port+' da Cédula de Identidade nº '+g(px+'rg')+' – '+g(px+'rgo')+', '+insc+' no CPF sob o nº '+cpf+', e-mail: '+em+', '+res+(end?' '+end:'');}
+var CI=0;
+function rom(n){var v={M:1000,CM:900,D:500,CD:400,C:100,XC:90,L:50,XL:40,X:10,IX:9,V:5,IV:4,I:1},s='';for(var k in v){while(n>=v[k]){s+=k;n-=v[k];}}return s;}
+function nc(){return rom(++CI);}
+function resetCI(){CI=0;}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function boldLine(line){var t=line.trim();if(!t)return'';if(/^INSTRUMENTO PARTICULAR/.test(t))return'<strong>'+line+'</strong>';var hdrs=['DO OBJETO:','DA SITUAÇÃO DO OBJETO:','DO VALOR DA VENDA:','DAS CERTIDÕES:','DA IMISSÃO NA POSSE:','DAS DESPESAS','DAS OBRIGAÇÕES:','DOS HONORÁRIOS DE CORRETAGEM:','DAS DISPOSIÇÕES FINAIS:','EM TEMPO'];if(hdrs.some(function(h){return t.indexOf(h)===0;}))return'<strong>'+line+'</strong>';line=line.replace(/^(OUTORGANTE[S]? PROMITENTE[S]? [^:]+:)/,'<strong>$1</strong>');line=line.replace(/^(OUTORGADO[S]? PROMITENTE[S]? [^:]+:)/,'<strong>$1</strong>');line=line.replace(/^([IVXLCDM]+-[ABC]\)|[IVXLCDM]+\)) /,function(m,rn){return'<strong>'+rn+'</strong> ';});line=line.replace(/\b(OUTORGANTE[S]?|OUTORGADO[S]?|OUTORGADA[S]?|ANUENTE)\b/g,'<strong>$1</strong>');return line;}
+function textToHtml(txt){var paras=esc(txt).split('\n\n');var out=paras.map(function(para){if(!para.trim())return'';var lines=para.split('\n'),processed=lines.map(function(l){return boldLine(l);}).filter(Boolean);if(!processed.length)return'';var t=lines[0].trim(),isSec=['DO OBJETO','DA SITUAÇÃO','DO VALOR','DAS CERTIDÕES','DA IMISSÃO','DAS DESPESAS','DAS OBRIGAÇÕES','DOS HONORÁRIOS','DAS DISPOSIÇÕES','EM TEMPO','INSTRUMENTO PARTICULAR'].some(function(h){return t.indexOf(h)===0;});return'<p'+(isSec?' class="sec"':'')+'>'+ processed.join('<br>') +'</p>';}).filter(Boolean);return out.join('\n');}
+function copiar(){var rb=document.getElementById('rb'),html2='<html><body>'+rb.innerHTML+'</body></html>',plain=rb.innerText;try{navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html2],{type:'text/html'}),'text/plain':new Blob([plain],{type:'text/plain'})})]).then(function(){var b=document.querySelector('.bcp'),o=b.textContent;b.textContent='Copiado ✓';setTimeout(function(){b.textContent=o;},2000);});}catch(e){navigator.clipboard.writeText(plain).then(function(){var b=document.querySelector('.bcp'),o=b.textContent;b.textContent='Copiado ✓';setTimeout(function(){b.textContent=o;},2000);});}}
+function preencherCampos(prefix,d){
+  function set(id,val){var el=document.getElementById(id);if(el&&val)el.value=val;}
+  if(d.nome)set(prefix+'n',d.nome);
+  if(d.sexo){var sBtn=document.querySelector('[onclick*="sr(this,\''+prefix+'s\',\''+d.sexo+'\')"]');if(sBtn)sBtn.click();else{RV[prefix+'s']=d.sexo;updProfNac(prefix,d.sexo);}}
+  if(d.nacionalidade)set(prefix+'nac',d.nacionalidade);
+  if(d.profissao)set(prefix+'prof',d.profissao);
+  if(d.rg)set(prefix+'rg',d.rg);
+  if(d.rgOrgao)set(prefix+'rgo',d.rgOrgao);
+  if(d.cpf)set(prefix+'cpf',d.cpf);
+  if(d.email)set(prefix+'em',d.email);
+  if(d.endereco)set(prefix+'end',d.endereco);
+  if(d.estadoCivil){var ecEl=document.getElementById(prefix+'ec');if(ecEl){ecEl.value=d.estadoCivil;ecEl.dispatchEvent(new Event('change'));}}
+  if(d.anuente&&d.anuente.nome&&prefix==='v1'){
+    set('v1an',d.anuente.nome);set('v1aNac',d.anuente.nacionalidade||'brasileiro');
+    var rgFull=(d.anuente.rg||'')+((d.anuente.rg&&d.anuente.rgOrgao)?' '+d.anuente.rgOrgao:'');if(rgFull)set('v1aRg',rgFull);
+    if(d.anuente.cpf)set('v1aCpf',d.anuente.cpf);if(d.anuente.email)set('v1aEm',d.anuente.email);
+    if(d.anuente.regime){var rEl=document.getElementById('v1aReg');if(rEl){var rv2=d.anuente.regime.toLowerCase().replace(/[ãõç]/g,function(c){return{ã:'a',õ:'o',ç:'c'}[c]||c;});['comunhão parcial de bens','comunhão universal de bens','separação total de bens'].forEach(function(o){if(rv2.indexOf(o.replace(/[ãõç]/g,function(c){return{ã:'a',õ:'o',ç:'c'}[c]||c;}).split(' ').slice(0,2).join(' '))>-1)rEl.value=o;});}}
+    if(d.anuente.sexo){var asBtn=document.querySelector('[onclick*="sr(this,\'v1as\',\''+d.anuente.sexo+'\')"]');if(asBtn)asBtn.click();}
   }
-  // Auto-fill nationality
-  var nac=document.getElementById(prefix+'nac');
-  if(nac){
-    var cv=nac.value.trim().toLowerCase();
-    if(!cv||cv==='brasileiro'||cv==='brasileira'){
-      nac.value=sexo==='f'?'brasileira':'brasileiro';
-    }
-  }
 }
-
-// ─── Extração automática por documentos ───
-var docsCache={};
-
+function compressImg(file){return new Promise(function(res){if(file.type==='application/pdf'){res({blob:file,mt:'application/pdf'});return;}var img=new Image(),url=URL.createObjectURL(file);img.onload=function(){var mW=1200,w=img.width,h=img.height;if(w>mW){h=Math.round(h*mW/w);w=mW;}var cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);URL.revokeObjectURL(url);cv.toBlob(function(b){res({blob:b,mt:'image/jpeg'});},'image/jpeg',0.75);};img.onerror=function(){URL.revokeObjectURL(url);res({blob:file,mt:file.type||'image/jpeg'});};img.src=url;});}
+async function fileToB64(file){var r=await compressImg(file);return new Promise(function(res,rej){var rd=new FileReader();rd.onload=function(){res({data:rd.result.split(',')[1],mt:r.mt});};rd.onerror=rej;rd.readAsDataURL(r.blob);});}
 function trigUp(prefix,tipo){document.getElementById('fi-'+prefix+'-'+tipo).click();}
-
-function hdlUp(prefix,tipo,input){
-  var file=input.files[0];if(!file)return;
-  if(!docsCache[prefix])docsCache[prefix]={};
-  docsCache[prefix][tipo]=file;
-  document.getElementById('ic-'+prefix+'-'+tipo).textContent='✅';
-  document.getElementById('ub-'+prefix+'-'+tipo).classList.add('ok');
-}
-
-function compressImg(file){
-  return new Promise(function(res){
-    if(file.type==='application/pdf'){res({blob:file,mt:'application/pdf'});return;}
-    var img=new Image(),url=URL.createObjectURL(file);
-    img.onload=function(){
-      var maxW=1200,w=img.width,h=img.height;
-      if(w>maxW){h=Math.round(h*maxW/w);w=maxW;}
-      var c=document.createElement('canvas');c.width=w;c.height=h;
-      c.getContext('2d').drawImage(img,0,0,w,h);
-      URL.revokeObjectURL(url);
-      c.toBlob(function(b){res({blob:b,mt:'image/jpeg'});},
-        'image/jpeg',0.75);
-    };
-    img.onerror=function(){URL.revokeObjectURL(url);res({blob:file,mt:file.type||'image/jpeg'});};
-    img.src=url;
-  });
-}
-
-async function fileToB64(file){
-  var r=await compressImg(file);
-  return new Promise(function(res,rej){
-    var rd=new FileReader();
-    rd.onload=function(){res({data:rd.result.split(',')[1],mt:r.mt});};
-    rd.onerror=rej;rd.readAsDataURL(r.blob);
-  });
-}
-
-
+function hdlUp(prefix,tipo,input){var file=input.files[0];if(!file)return;if(!docsCache[prefix])docsCache[prefix]={};docsCache[prefix][tipo]=file;document.getElementById('ic-'+prefix+'-'+tipo).textContent='✅';document.getElementById('ub-'+prefix+'-'+tipo).classList.add('ok');}
+async function callAPI(content){var resp=await fetch('/api/proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:400,messages:[{role:'user',content:content}]})});var data=await resp.json();if(data.error)throw new Error(data.error.message||JSON.stringify(data.error));var txt=(data.content||[]).find(function(b){return b.type==='text';});if(!txt)throw new Error('Sem resposta da API');return JSON.parse(txt.text.replace(/```json|```/g,'').trim());}
+async function docToContent(file){var r64=await fileToB64(file);return r64.mt==='application/pdf'?{type:'document',source:{type:'base64',media_type:'application/pdf',data:r64.data}}:{type:'image',source:{type:'base64',media_type:r64.mt,data:r64.data}};}
 async function extrairPreencher(prefix){
-  var docs=docsCache[prefix]||{};
-  if(!Object.keys(docs).length){alert('Faça upload de ao menos um documento.');return;}
-  var btn=document.getElementById('btn-ext-'+prefix);
-  var st=document.getElementById('st-'+prefix);
-  btn.disabled=true;btn.textContent='Extraindo...';st.textContent='';
-  var lbls={cnh:'CNH',res:'comprovante de residência',cert:'certidão'};
-  var merged={};
+  var docs=docsCache[prefix]||{};if(!Object.keys(docs).length){alert('Faça upload de ao menos um documento.');return;}
+  var btn=document.getElementById('btn-ext-'+prefix),st=document.getElementById('st-'+prefix);
+  btn.disabled=true;btn.textContent='Extraindo...';st.textContent='';var merged={};
   try{
-    for(var key in docs){
-      st.textContent='Lendo '+lbls[key]+'...';
-      var file=docs[key],r64=await fileToB64(file),content=[];
-      if(r64.mt==='application/pdf')content.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:r64.data}});
-      else content.push({type:'image',source:{type:'base64',media_type:r64.mt,data:r64.data}});
-      var prompt='';
-      if(key==='cnh')prompt='Extraia da CNH e retorne APENAS JSON sem markdown:\n{"nome":"NOME EM MAIUSCULAS","sexo":"m ou f","nacionalidade":"brasileiro ou brasileira","profissao":"profissao em minusculas ou vazio","rg":"APENAS os digitos do RG sem orgao","rgOrgao":"APENAS o orgao ex: DETRAN/RJ ou IFP/RJ","cpf":"CPF formatado","email":"email ou vazio"}\nRetorne SOMENTE o JSON.';
-      else if(key==='res')prompt='Extraia o endereco e retorne APENAS JSON sem markdown:\n{"endereco":"endereco residencial completo"}\nRetorne SOMENTE o JSON.';
-      else prompt='Extraia da certidao e retorne APENAS JSON sem markdown:\n{"estadoCivil":"solteiro ou casado ou divorciado ou viuvo","regimeBens":"regime de bens OBRIGATORIO se casado ex: comunhao parcial de bens","nomeConjuge":"nome do conjuge ou vazio","sexoConjuge":"m ou f ou vazio"}\nRetorne SOMENTE o JSON.';
-      content.push({type:'text',text:prompt});
-      var resp=await fetch('/api/proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:400,messages:[{role:'user',content:content}]})});
-      var data=await resp.json();
-      if(data.error)throw new Error(data.error.message||JSON.stringify(data.error));
-      var txt=(data.content||[]).find(function(b){return b.type==='text';});
-      if(!txt)throw new Error('Sem resposta para '+key);
-      var parsed=JSON.parse(txt.text.replace(/```json|```/g,'').trim());
-      for(var k in parsed){if(parsed[k]&&parsed[k]!=='')merged[k]=parsed[k];}
-    }
-    if(merged.estadoCivil==='casado'&&merged.nomeConjuge){
-      merged.anuente={nome:merged.nomeConjuge,sexo:merged.sexoConjuge||'f',
-        nacionalidade:'brasileiro',rg:'',rgOrgao:'',cpf:'',email:'',
-        regime:merged.regimeBens||''};
-    }
+    if(docs.cnh){st.textContent='Lendo CNH...';var p1=await callAPI([await docToContent(docs.cnh),{type:'text',text:'Extraia da CNH e retorne APENAS JSON sem markdown:\n{"nome":"NOME EM MAIUSCULAS","sexo":"m ou f","nacionalidade":"brasileiro ou brasileira","profissao":"profissao em minusculas ou vazio","rg":"APENAS os digitos do RG sem orgao","rgOrgao":"APENAS o orgao ex: DETRAN/RJ ou IFP/RJ","cpf":"CPF formatado","email":"email ou vazio"}\nRetorne SOMENTE o JSON.'}]);for(var k in p1){if(p1[k]&&p1[k]!=='')merged[k]=p1[k];}}
+    if(docs.res){st.textContent='Lendo comprovante...';var p2=await callAPI([await docToContent(docs.res),{type:'text',text:'Extraia o endereco e retorne APENAS JSON:\n{"endereco":"endereco residencial completo"}\nRetorne SOMENTE o JSON.'}]);if(p2.endereco)merged.endereco=p2.endereco;}
+    if(docs.cert){st.textContent='Lendo certidão...';var p3=await callAPI([await docToContent(docs.cert),{type:'text',text:'Extraia da certidao e retorne APENAS JSON:\n{"estadoCivil":"solteiro ou casado ou divorciado ou viuvo","regimeBens":"OBRIGATORIO se casado ex: comunhao parcial de bens","nomeConjuge":"nome do conjuge ou vazio","sexoConjuge":"m ou f ou vazio"}\nRetorne SOMENTE o JSON.'}]);for(var k3 in p3){if(p3[k3]&&p3[k3]!=='')merged[k3]=p3[k3];}}
+    if(merged.estadoCivil==='casado'&&merged.nomeConjuge)merged.anuente={nome:merged.nomeConjuge,sexo:merged.sexoConjuge||'f',nacionalidade:'brasileiro',rg:'',rgOrgao:'',cpf:'',email:'',regime:merged.regimeBens||''};
     preencherCampos(prefix,merged);
-    // Preencher regime para comprador casado
-    if(merged.regimeBens&&prefix==='c1'){
-      var rEl=document.getElementById('c1reg');if(rEl)rEl.value=merged.regimeBens;
-    }
-    st.textContent='Preenchido — revise antes de continuar';
-    st.style.color='var(--am)';
+    if(merged.regimeBens){var rEl=document.getElementById(prefix==='c1'?'c1reg':prefix==='c2'?'c2regCas':null);if(rEl)rEl.value=merged.regimeBens;}
+    st.textContent='✓ Preenchido — revise antes de continuar';st.style.color='var(--am)';
   }catch(e){st.textContent='Erro: '+e.message;st.style.color='var(--dg)';}
-  btn.disabled=false;btn.textContent='Extrair e preencher';
-}
-
-async function extrairImovel(){
-  var docs=docsCache['im']||{};
-  if(!Object.keys(docs).length){alert('Faça upload de ao menos um documento.');return;}
-  var btn=document.getElementById('btn-ext-im');
-  var st=document.getElementById('st-im');
-  btn.disabled=true;btn.textContent='Extraindo...';st.textContent='';
-  var lbls={iptu:'Carnê ou boleto de IPTU (inscrição municipal, endereço completo, número do apartamento)',mat:'Matrícula do imóvel no RGI (número da matrícula, ofício/cartório, endereço, bairro)'};
-  var merged={};
-  try{
-    for(var key in docs){
-      st.textContent='Lendo documento...';
-      var file=docs[key];
-      var r64=await fileToB64(file);
-      var content=[];
-      if(r64.mt==='application/pdf'){content.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:r64.data}});}
-      else{content.push({type:'image',source:{type:'base64',media_type:r64.mt,data:r64.data}});}
-      content.push({type:'text',text:'[Documento: '+lbls[key]+']'});
-      content.push({type:'text',text:'Extraia os dados do imóvel e retorne APENAS JSON sem markdown:\n{\n"rua":"nome da rua sem número ex: Rua Senador Vergueiro",\n"numPredio":"APENAS o número do prédio na rua ex: 56",\n"apto":"APENAS os dígitos do apartamento ex: 201 — NÃO escreva a palavra APARTAMENTO",\n"bairro":"nome do bairro",\n"matricula":"número da matrícula",\n"oficio":"número do ofício do cartório",\n"iptu":"inscrição IPTU"\n}\nUse string vazia para campos não encontrados. Retorne SOMENTE o JSON.'});
-      var resp=await fetch('/api/proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:400,messages:[{role:'user',content}]})});
-      var data=await resp.json();
-      if(data.error)throw new Error(typeof data.error==='string'?data.error:(data.error.message||JSON.stringify(data.error)));
-      var txt=(data.content||[]).find(function(b){return b.type==='text';});
-      if(!txt)throw new Error('Sem resposta');
-      var clean=txt.text.replace(/```json|```/g,'').trim();
-      var parsed=JSON.parse(clean);
-      for(var k in parsed){if(parsed[k]&&parsed[k]!=='')merged[k]=parsed[k];}
-    }
-    function set(id,val){var el=document.getElementById(id);if(el&&val)el.value=val;}
-    set('irua',merged.rua);set('inpred',merged.numPredio);set('iapto',merged.apto);
-    set('ibairro',merged.bairro);set('imat',merged.matricula);
-    set('iofic',merged.oficio);set('iiptu',merged.iptu);
-    st.textContent='✓ Preenchido — revise antes de continuar';
-    st.style.color='var(--am)';
-  }catch(e){
-    st.textContent='Erro: '+e.message;st.style.color='var(--dg)';
-  }
   btn.disabled=false;btn.textContent='Extrair e preencher ↗';
 }
-
+async function extrairImovel(){
+  var docs=docsCache['im']||{};if(!Object.keys(docs).length){alert('Faça upload de ao menos um documento.');return;}
+  var btn=document.getElementById('btn-ext-im'),st=document.getElementById('st-im');
+  btn.disabled=true;btn.textContent='Extraindo...';st.textContent='Lendo...';var merged={};
+  try{
+    for(var key in docs){var p=await callAPI([await docToContent(docs[key]),{type:'text',text:'Extraia dados do imovel e retorne APENAS JSON sem markdown:\n{"rua":"nome da rua sem numero","numPredio":"APENAS o numero do predio na rua ex: 56","apto":"APENAS os digitos do apartamento ex: 201 — NAO escreva APARTAMENTO","bairro":"bairro","matricula":"numero da matricula","oficio":"numero do oficio do cartorio","iptu":"inscricao IPTU"}\nUse string vazia para nao encontrados. Retorne SOMENTE o JSON.'}]);for(var k in p){if(p[k]&&p[k]!=='')merged[k]=p[k];}}
+    function set(id,val){var el=document.getElementById(id);if(el&&val)el.value=val;}
+    set('irua',merged.rua);set('inpred',merged.numPredio);set('iapto',merged.apto);set('ibairro',merged.bairro);set('imat',merged.matricula);set('iofic',merged.oficio);set('iiptu',merged.iptu);
+    st.textContent='✓ Preenchido — revise antes de continuar';st.style.color='var(--am)';
+  }catch(e){st.textContent='Erro: '+e.message;st.style.color='var(--dg)';}
+  btn.disabled=false;btn.textContent='Extrair e preencher ↗';
+}
+async function extrairParceiroInterno(prefix,outro,mesmoEnd,conjuges,btnId,stId){
+  var cnh=docsCache[prefix]&&docsCache[prefix]['cnh'];if(!cnh){alert('Faça upload da CNH.');return;}
+  var btn=document.getElementById(btnId),st=document.getElementById(stId);
+  btn.disabled=true;btn.textContent='Extraindo...';st.textContent='';var merged={};
+  try{
+    st.textContent='Lendo CNH...';var p1=await callAPI([await docToContent(cnh),{type:'text',text:'Extraia da CNH e retorne APENAS JSON:\n{"nome":"NOME EM MAIUSCULAS","sexo":"m ou f","nacionalidade":"brasileiro ou brasileira","profissao":"profissao em minusculas ou vazio","rg":"APENAS os digitos do RG","rgOrgao":"APENAS o orgao ex: DETRAN/RJ","cpf":"CPF formatado","email":"email ou vazio"}\nRetorne SOMENTE o JSON.'}]);
+    for(var k in p1){if(p1[k]&&p1[k]!=='')merged[k]=p1[k];}
+    if(!mesmoEnd&&docsCache[prefix]&&docsCache[prefix]['res']){st.textContent='Lendo comprovante...';var p2=await callAPI([await docToContent(docsCache[prefix]['res']),{type:'text',text:'Extraia o endereco e retorne APENAS JSON:\n{"endereco":"endereco completo"}\nRetorne SOMENTE o JSON.'}]);if(p2.endereco)merged.endereco=p2.endereco;}
+    var certFile=conjuges&&docsCache[outro]&&docsCache[outro]['cert']?docsCache[outro]['cert']:(!conjuges&&docsCache[prefix]&&docsCache[prefix]['cert']?docsCache[prefix]['cert']:null);
+    if(certFile){st.textContent='Lendo certidão...';var p3=await callAPI([await docToContent(certFile),{type:'text',text:'Extraia da certidao e retorne APENAS JSON:\n{"estadoCivil":"casado","regimeBens":"OBRIGATORIO — regime de bens ex: comunhao parcial de bens"}\nRetorne SOMENTE o JSON.'}]);for(var k3 in p3){if(p3[k3])merged[k3]=p3[k3];}}
+    preencherCampos(prefix,merged);
+    if(mesmoEnd){var eEl=document.getElementById(prefix+'end');if(eEl)eEl.value=document.getElementById(outro+'end').value||'';}
+    if(conjuges&&merged.regimeBens){var regId=prefix[0]==='v'?'v2regCas':'c2regCas',regEl=document.getElementById(regId);if(regEl){var rv3=merged.regimeBens.toLowerCase().replace(/[ãõç]/g,function(c){return{ã:'a',õ:'o',ç:'c'}[c]||c;});['comunhão parcial de bens','comunhão universal de bens','separação total de bens'].forEach(function(o){if(rv3.indexOf(o.replace(/[ãõç]/g,function(c){return{ã:'a',õ:'o',ç:'c'}[c]||c;}).split(' ').slice(0,2).join(' '))>-1)regEl.value=o;});}}
+    st.textContent='✓ Preenchido'+(conjuges?' — cônjuges':'')+' — revise';st.style.color='var(--am)';
+  }catch(e){st.textContent='Erro: '+e.message;st.style.color='var(--dg)';}
+  btn.disabled=false;btn.textContent='Extrair e preencher ↗';
+}
 function extrairV2(){extrairParceiroInterno('v2','v1',v2MesmoEnd,v2Conjuges,'btn-ext-v2','st-v2');}
 function extrairC2(){extrairParceiroInterno('c2','c1',c2MesmoEnd,c2Conjuges,'btn-ext-c2','st-c2');}
+function gerarDocx(){if(!lastMinutaTxt){alert('Gere a minuta primeiro.');return;}var btn=document.getElementById('btn-docx'),orig=btn.textContent;btn.textContent='Gerando...';btn.disabled=true;var fname='minuta_'+g('irua').replace(/\s+/g,'_')+'_'+g('iapto')+'.docx';fetch('/api/docx',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:lastMinutaTxt,filename:fname})}).then(function(r){if(!r.ok)return r.json().then(function(e){throw new Error(e.error||'Erro');});return r.blob();}).then(function(blob){var url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=fname;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);}).catch(function(e){alert('Erro ao gerar Word: '+e.message);}).finally(function(){btn.textContent=orig;btn.disabled=false;});}
+function chkBancoOutro(id){var sel=document.getElementById(id),inp=document.getElementById(id+'Outro');if(!inp)return;inp.style.display=sel.value==='__outro__'?'block':'none';if(sel.value!=='__outro__')inp.value='';}
 
-function gerarDocx(){
-  if(!lastMinutaTxt){alert('Gere a minuta primeiro.');return;}
-  var btn=document.getElementById('btn-docx');
-  var orig=btn.textContent;
-  btn.textContent='Gerando...';btn.disabled=true;
-  var rua=g('irua')||'imovel',apto=g('iapto')||'apto';
-  var fname='minuta_'+rua.replace(/\s+/g,'_')+'_'+apto+'.docx';
-  fetch('/api/docx',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({text:lastMinutaTxt,filename:fname})
-  }).then(function(r){
-    if(!r.ok)return r.json().then(function(e){throw new Error(e.error||'Erro no servidor');});
-    return r.blob();
-  }).then(function(blob){
-    var url=URL.createObjectURL(blob);
-    var a=document.createElement('a');a.href=url;a.download=fname;
-    document.body.appendChild(a);a.click();
-    document.body.removeChild(a);URL.revokeObjectURL(url);
-  }).catch(function(e){
-    alert('Erro ao gerar Word: '+e.message);
-  }).finally(function(){
-    btn.textContent=orig;btn.disabled=false;
-  });
+function gerar(){
+  resetCI();
+  var nv=parseInt(rv('nv')||'1'),nc_=parseInt(rv('nc')||'1');
+  var v1s=rv('v1s')||'m',v2s=rv('v2s')||'m',c1s=rv('c1s')||'m',c2s=rv('c2s')||'m';
+  var vPl=nv>1,cPl=nc_>1;
+  var OV=vPl?'OS OUTORGANTES':adj(v1s,'O OUTORGANTE','A OUTORGANTE');
+  var ov=vPl?'os OUTORGANTES':adj(v1s,'o OUTORGANTE','a OUTORGANTE');
+  var doV=vPl?'dos OUTORGANTES':adj(v1s,'do OUTORGANTE','da OUTORGANTE');
+  var aoV=vPl?'aos OUTORGANTES':adj(v1s,'ao OUTORGANTE','à OUTORGANTE');
+  var peloV=vPl?'pelos OUTORGANTES':adj(v1s,'pelo OUTORGANTE','pela OUTORGANTE');
+  var decV=vPl?'declaram':'declara',comV=vPl?'comprometem-se':'compromete-se';
+  var esteV=vPl?'estes':adj(v1s,'este','esta');
+  var OC=cPl?'OS OUTORGADOS':adj(c1s,'O OUTORGADO','A OUTORGADA');
+  var oc=cPl?'os OUTORGADOS':adj(c1s,'o OUTORGADO','a OUTORGADA');
+  var doC=cPl?'dos OUTORGADOS':adj(c1s,'do OUTORGADO','da OUTORGADA');
+  var aoC=cPl?'aos OUTORGADOS':adj(c1s,'ao OUTORGADO','à OUTORGADA');
+  var peloC=cPl?'pelos OUTORGADOS':adj(c1s,'pelo OUTORGADO','pela OUTORGADA');
+  var decC=cPl?'declaram':'declara',vistC=cPl?'vistoriaram':'vistoriou',acC=cPl?'aceitam':'aceita';
+  var serC=cPl?'serão imitidos':adj(c1s,'será imitido','será imitida');
+  var esteC=cPl?'estes':adj(c1s,'este','esta');
+  var laudemio=tv('laudemio'),senhorio=g('senhorio'),prazoAlv=g('prazoAlv')||'30';
+  var financAtivo=tv('financAtivo'),bancoF=g('bancoF')==='__outro__'?g('bancoFOutro'):g('bancoF');
+  var contratoF=g('contratoF'),saldoF=g('saldoF');
+  var averbCas=tv('averbCas'),averbObi=tv('averbObi'),bDest=tv('bDest');
+  var apto=g('iapto'),rua=g('irua'),npred=g('inpred'),bairro=g('ibairro'),mat=g('imat'),ofic=g('iofic'),iptu=g('iiptu');
+  var temMov=tv('moveis'),listaMov=typeof getMoveisTxt==='function'?getMoveisTxt():'';
+  var vT=parseFloat(g('vtot')||0),vA=parseFloat(g('va')||0),vB=parseFloat(g('vb')||0),vC=parseFloat(g('vc')||0);
+  var gatB=rv('gatB')||'dias',prazoB=g('prazoB')||'60',modC=rv('modC')||'fin';
+  var vFgts=parseFloat(g('vfgts')||0),vFinc=parseFloat(g('vfinc')||0),prazoCD=g('prazoCD')||'60',dataEsc=g('dataEsc');
+  var multa=rv('multa')||'pct',mdia=g('mdia')||'500';
+  var banco=g('banco')==='__outro__'?g('bancoOutro'):g('banco'),agenc=g('agenc'),conta=g('conta'),pix_=g('pix');
+  var dadosB='o Banco '+banco+', agência '+agenc+', C/C '+conta+', PIX: '+pix_;
+  var gatP=rv('gatP')||'prot',pzPos=g('pzPos')||'2',dataEscP=g('dataEscP'),datMin=g('datMin');
+  var vCorr=parseFloat(g('vcorr')||0),strC=rv('strC')||'met',parc=tv('parc');
+  var p1n=g('p1n'),p1cj=g('p1cj'),p1v1=parseFloat(g('p1v1')||0),p1v2=parseFloat(g('p1v2')||0);
+  var p2n=g('p2n'),p2cj=g('p2cj'),p2v1=parseFloat(g('p2v1')||0),p2v2=parseFloat(g('p2v2')||0);
+  var hwV1=vCorr/2-p1v1-p2v1,hwV2=vCorr/2-p1v2-p2v2;
+  var dia=g('dia'),mes=g('mes'),ano=g('ano');
+  var t1el=document.getElementById('t1'),t2el=document.getElementById('t2');
+  var test1=t1el.value==='outro'?g('t1c'):t1el.value,test2=t2el.value==='outro'?g('t2c'):t2el.value;
+  var vTit=nv===1?adj(v1s,'OUTORGANTE PROMITENTE VENDEDOR','OUTORGANTE PROMITENTE VENDEDORA'):'OUTORGANTES PROMITENTES VENDEDORES';
+  var cTit=nc_===1?adj(c1s,'OUTORGADO PROMITENTE COMPRADOR','OUTORGADA PROMITENTE COMPRADORA'):'OUTORGADOS PROMITENTES COMPRADORES';
+  var vQ='',cQ='';
+  if(nv===1)vQ=qv(1);
+  else{var v2rc=g('v2regCas');if(v2rc){var cas=v1s==='f'&&v2s==='f'?'casadas':'casados';vQ=qv(1).replace(/,\s*doravante.*$/,'')+', e '+qv(2).replace(/,\s*doravante.*$/,'')+', '+cas+' pelo regime de '+v2rc+' e residentes e domiciliados no Rio de Janeiro, doravante denominados OUTORGANTES';}else vQ=qv(1)+';\n'+qv(2);}
+  if(nc_===1)cQ=qc(1)+', doravante '+adj(c1s,'denominado','denominada')+' OUTORGADO';
+  else{var c2rc=g('c2regCas');if(c2rc){var casc=c1s==='f'&&c2s==='f'?'casadas':'casados',resc=c1s==='f'&&c2s==='f'?'residentes e domiciliadas':'residentes e domiciliados';cQ=qc(1)+', e '+qc(2)+', '+casc+' pelo regime de '+c2rc+' e '+resc+(g('c1end')?' '+g('c1end'):'')+', doravante denominados OUTORGADOS';}else cQ=qc(1)+', doravante '+adj(c1s,'denominado','denominada')+' OUTORGADO, e '+qc(2)+', doravante '+adj(c2s,'denominado','denominada')+adj(c2s,' OUTORGADO',' OUTORGADA')+', doravante denominados OUTORGADOS';}
+  var C1=nc(),C2=nc(),C3=nc();
+  var ftxt=laudemio?', foreiro ao '+senhorio:'';
+  var grav=financAtivo?' com exceção do saldo do financiamento junto à '+bancoF+', contrato nº '+contratoF+', no valor atual de R$ '+fBRL(saldoF)+' ('+exBRL(saldoF)+')':'';
+  var movRef=listaMov?'obrigando-se '+ov+' a conservá-los e entregá-los nas mesmas condições quando da vistoria realizada, nesta data. Ficam as fotos do site www.imoveisdescolados.com.br como referência.':'obrigando-se '+ov+' a conservá-lo e entregá-lo nas mesmas condições quando da vistoria realizada, nesta data. Ficam as fotos do site www.imoveisdescolados.com.br como referência.';
+  var incMov=listaMov?'incluindo os móveis e objetos listados abaixo, ':'';
+  var pATxt=C3+'-A) R$ '+fBRL(vA)+' ('+exBRL(vA)+'), a título de sinal e princípio de pagamento, a serem pagos no ato da assinatura do presente instrumento, através de transferência bancária em nome '+doV+' para '+dadosB+'.';
+  var pBtrig='';
+  if(gatB==='dias')pBtrig='no ato da assinatura do Contrato Particular de Compra e Venda com Alienação Fiduciária, com força de escritura pública, que deverá ocorrer em até '+prazoB+' ('+n2w(parseInt(prazoB))+') dias após a assinatura deste instrumento';
+  else if(gatB==='certs')pBtrig='após a apresentação das certidões negativas listadas no item '+C2;
+  else pBtrig='no ato da assinatura do Contrato Particular de Compra e Venda com Alienação Fiduciária, que deverá ser assinado em até 30 (trinta) dias contados a partir da obtenção do alvará de venda do '+senhorio;
+  var pBdest=bDest&&financAtivo?' Os referidos recursos deverão ser destinados obrigatória e exclusivamente '+peloC+' à quitação do saldo devedor do financiamento imobiliário, contrato nº '+contratoF+', junto à '+bancoF+'.':'';
+  var pBTxt=C3+'-B) R$ '+fBRL(vB)+' ('+exBRL(vB)+'), por meio de uma parcela fixa e irreajustável, a serem pagos com recursos próprios, '+pBtrig+', através de PIX ou transferência bancária em nome '+doV+' para '+dadosB+'.'+pBdest+' O atraso no pagamento desta parcela importará em multa a ser paga '+peloC+' '+aoV+', em valor equivalente a 1,5% (hum e meio por cento) do saldo remanescente por cada período de 30 dias do atraso, calculados pro rata die.';
+  var prt5='Fica acertado que, tão logo se encontre assinado e celebrado o contrato particular de compra e venda com alienação fiduciária, '+oc+' terão um prazo máximo de 5 (cinco) dias úteis para apresentá-lo para registro perante o cartório competente, devendo fornecer cópia do protocolo cartorário '+aoV+'.';
+  var multDt=multa==='dia'?'O não cumprimento dos prazos ora estabelecidos implicará na incidência de multa diária no valor de R$ '+fBRL(mdia)+' ('+exBRL(mdia)+') por dia de atraso. ':'';
+  var pCTxt='';
+  if(modC==='fin')pCTxt=C3+'-C) R$ '+fBRL(vC)+' ('+exBRL(vC)+') a serem pagos '+peloC+' por meio de recursos de financiamento imobiliário nos moldes da instituição financeira financiadora, após o efetivo registro do contrato de financiamento imobiliário com força de escritura pública. O efetivo registro é providência a cargo e às expensas '+doC+', que deverá fornecer '+aoV+' uma cópia do instrumento registrado. '+prt5+' '+multDt+'Tão logo o contrato esteja registrado, caberá a instituição financeira transferir o valor para a conta '+doV+' em '+dadosB+'.';
+  else if(modC==='fgts')pCTxt=C3+'-C) R$ '+fBRL(vC)+' ('+exBRL(vC)+') a serem pagos '+peloC+' por meio de recursos do FGTS (aproximadamente R$ '+fBRL(vFgts)+') e de financiamento imobiliário (aproximadamente R$ '+fBRL(vFinc)+') nos moldes da instituição financeira financiadora, após o efetivo registro do contrato de financiamento imobiliário. A divisão dos valores é aproximada, comprometendo-se '+oc+' à integralização do saldo com financiamento bancário, independentemente do valor existente nas contas do FGTS. O efetivo registro é providência a cargo e às expensas '+doC+', que deverá fornecer '+aoV+' uma cópia do instrumento registrado. '+prt5+' '+multDt+'Tão logo o contrato esteja registrado, caberá a instituição financeira transferir o valor para a conta '+doV+' em '+dadosB+'.';
+  else if(modC==='cons')pCTxt=C3+'-C) R$ '+fBRL(vC)+' ('+exBRL(vC)+') a serem pagos '+peloC+' por meio de recursos de carta de crédito de consórcio contemplada, após o efetivo registro do Contrato Particular de Compra e Venda com Alienação Fiduciária. '+prt5+' Tão logo o contrato esteja registrado, caberá a instituição financeira transferir o valor para a conta '+doV+' em '+dadosB+'.';
+  else if(modC==='propb')pCTxt=C3+'-C) R$ '+fBRL(vC)+' ('+exBRL(vC)+'), por meio de uma parcela fixa e irreajustável, a serem pagos com recursos próprios, após a baixa da alienação fiduciária junto ao '+ofic+'º Registro Geral de Imóveis, no ato da assinatura da escritura definitiva'+(dataEsc?', a qual deverá ocorrer em '+dataEsc:'')+', mediante PIX ou transferência bancária em nome '+doV+' para '+dadosB+'. O atraso importará em multa equivalente a 1,5% do valor desta parcela por cada período de 30 dias de atraso, calculados pro rata die.';
+  else pCTxt=C3+'-C) R$ '+fBRL(vC)+' ('+exBRL(vC)+'), por meio de uma parcela fixa e irreajustável, a serem pagos com recursos próprios'+(dataEsc?', no ato da assinatura da escritura definitiva em '+dataEsc:'')+', mediante PIX ou transferência bancária em nome '+doV+' para '+dadosB+'.';
+  var C4=nc();
+  var alvItem=laudemio?' e alvará de venda emitido pelo '+senhorio:'';
+  var prazoEC=laudemio?'30':'15';
+  var despExc='';
+  if(laudemio)despExc=', com exceção da taxa de Laudêmio e eventuais foros atrasados que deverão ser pagos '+peloV;
+  if(financAtivo)despExc+='. Incumbirá exclusivamente '+aoV+', às suas expensas, o pagamento de todas as custas e emolumentos relativos ao registro do Termo de Quitação do financiamento junto ao '+ofic+'º Registro Geral de Imóveis';
+  var C5=nc(),C6=nc(),C7=nc();
+  var ptrig='';
+  if(gatP==='prot')ptrig='em até '+pzPos+' ('+n2w(parseInt(pzPos))+') dias úteis da apresentação do protocolo de prenotação do Registro perante o Cartório de Registro de Imóveis competente';
+  else if(gatP==='c3')ptrig='em até '+pzPos+' ('+n2w(parseInt(pzPos))+') dias do recebimento dos valores descritos no item '+C3+'-C deste instrumento';
+  else ptrig='no dia da assinatura da escritura definitiva'+(dataEscP?', '+dataEscP:'');
+  var dmTxt=datMin?', mas não antes de '+datMin:'';
+  var C8=nc(),C9=nc();
+  var laudOb=laudemio?'\n\n- A obrigação de obtenção do alvará emitido pelo '+senhorio+' é de responsabilidade '+doV+' e deve ser emitido em até '+prazoAlv+' dias após o recebimento do pagamento do item '+C3+'-A.':'';
+  var averbCasTxt=averbCas?'\n\n- Fica ajustado que o pedido de averbação do casamento na matrícula do imóvel é de obrigação '+doV+'. Esta obrigação deverá estar concluída em até 30 dias. Caso sofra algum atraso, o prazo determinado na cláusula '+C3+'-B também poderá sofrer atraso, sem punição, do mesmo período de tempo.':'';
+  var C10=nc();
+  var regTxt='';
+  if(modC==='fgts')regTxt='Fica ajustado que a assinatura do contrato particular de compra e venda com alienação fiduciária deverá acontecer em no máximo '+prazoCD+' ('+n2w(parseInt(prazoCD))+') dias úteis contados a partir da assinatura deste compromisso. O atraso na assinatura importará em multa a ser paga '+peloC+' '+aoV+', em valor equivalente a 1,5% do valor do imóvel por cada período de 30 dias do atraso. O pedido de registro deverá ser protocolado perante o '+ofic+'º Ofício do Registro de Imóveis no prazo de até 5 dias úteis. '+multDt;
+  else regTxt='Fica ajustado que o pedido de registro do contrato definitivo deverá ser protocolado '+peloC+' perante o '+ofic+'º Ofício do Registro de Imóveis no prazo de até 5 (cinco) dias úteis, contados da data da assinatura do citado instrumento, a cargo e às expensas '+doC+'.';
+  var clausEsp='';
+  if(financAtivo&&!bDest){var Cf=nc();clausEsp+='\n\n'+Cf+') '+OV+' se obriga, como condição essencial para a realização da escritura definitiva, a promover junto à '+bancoF+' a quitação integral do financiamento imobiliário, contrato nº '+contratoF+', e a providenciar, às suas exclusivas expensas, o Termo de Quitação e o seu registro perante o '+ofic+'º Cartório de Registro Geral de Imóveis, com a consequente baixa da alienação fiduciária.';}
+  if(averbObi){var Co=nc();clausEsp+='\n\n'+Co+') '+OC+' se obriga, como condição essencial para a realização da escritura definitiva, a providenciar, às suas exclusivas expensas, a averbação da certidão de óbito de seu cônjuge junto ao Cartório de Registro Civil competente.';}
+  var CC=nc();
+  var HW='46.367.985/0001-99';
+  var corrTxt='';
+  if(!parc){if(strC==='met'){var half=vCorr/2;corrTxt='As Partes reconhecem a empresa HW Assessoria Imobiliária Ltda CNPJ '+HW+' como intermediadora do presente negócio, fazendo jus ao recebimento da quantia de R$ '+fBRL(vCorr)+' ('+exBRL(vCorr)+') a ser paga '+peloV+', como honorários de corretagem, cujo recebimento será feito em 2 parcelas iguais no valor de R$ '+fBRL(half)+' ('+exBRL(half)+') cada, sendo a primeira no ato da assinatura deste instrumento (após a compensação do valor descrito no item '+C3+'-A na conta '+doV+') e a segunda no ato da escritura definitiva (após a compensação do valor descrito no item '+C3+'-B na conta '+doV+').';}else if(strC==='prop')corrTxt='As Partes reconhecem a empresa HW Assessoria Imobiliária Ltda CNPJ '+HW+' como intermediadora do presente negócio, fazendo jus ao recebimento da quantia de R$ '+fBRL(vCorr)+' ('+exBRL(vCorr)+') a ser paga '+peloV+', como honorários de corretagem. O pagamento será realizado de forma proporcional, correspondendo a 5% (cinco por cento) sobre cada valor recebido '+peloV+', conforme descrito nos itens '+C3+'-A, '+C3+'-B e '+C3+'-C do presente instrumento.';else corrTxt='As Partes reconhecem a empresa HW Assessoria Imobiliária Ltda CNPJ '+HW+' como intermediadora do presente negócio, fazendo jus ao recebimento da quantia de R$ '+fBRL(vCorr)+' ('+exBRL(vCorr)+') a ser paga '+peloV+', como honorários de corretagem, cujo recebimento será feito em parcela única, no ato do recebimento do valor descrito no item '+C3+'-C.';}
+  else{var pnms='HW Assessoria Imobiliária Ltda CNPJ '+HW;if(p1n)pnms+=', '+p1n+' CNPJ '+p1cj;if(p2n&&tv('p2'))pnms+=' e '+p2n+' CNPJ '+p2cj;if(strC==='met'){var half2=vCorr/2,d1='',d2='';if(p1n){d1+=', sendo R$ '+fBRL(hwV1)+' ('+exBRL(hwV1)+') para HW Assessoria Imobiliária Ltda e R$ '+fBRL(p1v1)+' ('+exBRL(p1v1)+') para '+p1n;d2+=', sendo R$ '+fBRL(hwV2)+' ('+exBRL(hwV2)+') para HW Assessoria Imobiliária Ltda e R$ '+fBRL(p1v2)+' ('+exBRL(p1v2)+') para '+p1n;}if(p2n&&tv('p2')){d1+=' e R$ '+fBRL(p2v1)+' ('+exBRL(p2v1)+') para '+p2n;d2+=' e R$ '+fBRL(p2v2)+' ('+exBRL(p2v2)+') para '+p2n;}corrTxt='As Partes reconhecem a empresa '+pnms+' ("Imobiliárias") como intermediadores do presente negócio, fazendo jus ao recebimento da quantia de R$ '+fBRL(vCorr)+' ('+exBRL(vCorr)+') a ser paga '+peloV+', como honorários de corretagem, cujo recebimento será feito em 2 parcelas iguais no valor de R$ '+fBRL(half2)+' ('+exBRL(half2)+') cada, sendo a primeira no ato da assinatura deste instrumento'+d1+' e a segunda no recebimento do valor do item '+C3+'-B'+d2+'.';}else if(strC==='prop')corrTxt='As Partes reconhecem a empresa '+pnms+' ("Imobiliárias") como intermediadores do presente negócio, fazendo jus ao recebimento da quantia de R$ '+fBRL(vCorr)+' ('+exBRL(vCorr)+') a ser paga '+peloV+', como honorários de corretagem. O pagamento será realizado de forma proporcional, correspondendo a 5% sobre cada valor recebido '+peloV+', conforme descrito nos itens '+C3+'-A, '+C3+'-B e '+C3+'-C.';else corrTxt='As Partes reconhecem a empresa '+pnms+' ("Imobiliárias") como intermediadores do presente negócio, fazendo jus ao recebimento da quantia de R$ '+fBRL(vCorr)+' ('+exBRL(vCorr)+') a ser paga '+peloV+', como honorários de corretagem, cujo recebimento será feito em parcela única, no ato do recebimento do valor descrito no item '+C3+'-C.';}
+  corrTxt+='\n\nFica previamente acordado entre as partes que se por qualquer motivo o item '+C3+'-A tenha que ser devolvido '+peloV+', a IMOBILIÁRIA terá até 48 (quarenta e oito) horas para devolver a primeira parcela dos honorários de corretagem.';
+  var CD1=nc(),CD2=nc(),CD3=nc();
+  var sigs=adj(v1s,'OUTORGANTE','OUTORGANTE')+' — '+g('v1n').toUpperCase()+'\n\n________________________________________________________________________________';
+  if(g('v1ec')==='casado'&&g('v1an')&&!v2Conjuges)sigs+='\n\nANUENTE — '+g('v1an').toUpperCase()+'\n\n________________________________________________________________________________';
+  if(nv===2&&g('v2n'))sigs+='\n\nOUTORGANTE — '+g('v2n').toUpperCase()+'\n\n________________________________________________________________________________';
+  sigs+='\n\nOUTORGAD'+adj(c1s,'O','A')+' — '+g('c1n').toUpperCase()+'\n\n________________________________________________________________________________';
+  if(nc_===2&&g('c2n'))sigs+='\n\nOUTORGAD'+adj(c2s,'O','A')+' — '+g('c2n').toUpperCase()+'\n\n________________________________________________________________________________';
+  sigs+='\n\nTestemunha 1 — '+test1+'\n\n________________________________________________________________________________\n\nTestemunha 2 — '+test2;
+  var movTxt=listaMov?'\n\n'+listaMov:'';
+  var txt='INSTRUMENTO PARTICULAR DE PROMESSA DE COMPRA E VENDA DE IMÓVEL IRRETRATÁVEL E IRREVOGÁVEL COM CLÁUSULA RESOLUTIVA, na forma abaixo, que entre si fazem:\n\n'+vTit+': '+vQ+';\n\n'+cTit+': '+cQ+'.\n\nAssim, pelo presente instrumento e nos melhores termos legais, ajustam os contratantes a venda do imóvel descrito na cláusula a seguir.\n\n\nDO OBJETO:\n\n'+C1+') Imóvel constituído pelo apartamento '+apto+' da '+rua+', '+npred+' – '+bairro+' – Rio de Janeiro/RJ. O imóvel encontra-se devidamente descrito e caracterizado na matrícula nº '+mat+' do '+ofic+'º Ofício do Registro de Imóveis, desta comarca, inscrição do IPTU n° '+iptu+ftxt+'.\n\n\nDA SITUAÇÃO DO OBJETO:\n\n'+C2+') '+OV+' '+decV+' que o referido imóvel se encontra livre e desembaraçado de todos e quaisquer ônus, tanto de natureza pessoal ou real, judicial ou extrajudicial, bem como que o imóvel não possui arrestos ou sequestros ou outras medidas expropriatórias, impostos, tarifas, taxas, contribuições e débitos de qualquer natureza, não tendo '+ov+' conhecimento de qualquer outra situação que possa ser empecilho para presente negociação ou pôr em risco a situação do imóvel'+(grav?grav+'.':'.')+'\n\n'+decC.charAt(0).toUpperCase()+decC.slice(1)+' '+oc+' que '+vistC+' o imóvel e que '+acC+' recebê-lo no estado em que se encontra, '+incMov+movRef+movTxt+'\n\n\nDO VALOR DA VENDA:\n\n'+C3+') '+OV+' '+comV+' a vender, em caráter irrevogável e irretratável, '+aoC+' o dito imóvel pelo preço total de R$ '+fBRL(vT)+' ('+exBRL(vT)+'), conforme as condições abaixo estipuladas:\n\n'+pATxt+'\n\n'+pBTxt+'\n\n'+pCTxt+'\n\n\nDAS CERTIDÕES:\n\nAs certidões descritas na cláusula '+C4+' abaixo, deverão ser entregues '+peloV+' '+aoC+' em até '+prazoEC+' ('+n2w(parseInt(prazoEC))+') dias da assinatura do presente instrumento.\n\n'+C4+') Correrão por conta '+doV+' as seguintes certidões negativas do foro do Rio de Janeiro – RJ. São elas: do 1º e 2º Ofícios de Interdições e Tutelas, 2º Ofício de Registro de Distribuição da Capital (pesquisa cível e fazendária), Certidão Fiscal Estadual, Certidão negativa da Justiça Federal e Trabalhista, Ônus Reais atualizada, Quitação Fiscal imobiliária e Enfitêutica, certidão do 2º Ofício Distribuidor (referente ao Imóvel e '+aoV+'), declaração de quitação condominial com firma reconhecida, Taxa de Incêndio (FUNESBOM), Certidão negativa de tributos federais fornecida pela Secretaria da Receita Federal/Ministério da Fazenda, cópias autenticadas de cédula de identidade, cartão de inscrição no CPF e certidão de casamento/nascimento atualizada nos últimos 180 dias'+alvItem+'.\n\nEM TEMPO – Na hipótese das certidões descritas no Item '+C4+' perderem a sua validade jurídica, devido ao atraso na assinatura do contrato, a parte que der causa irá arcar com as despesas de novas certidões atualizadas.\n\nAs despesas de transferência oriundas do presente negócio, Cartório de notas para lavratura da escritura, Cartório de Registro de Imóveis e o pagamento do Imposto de Transmissão de Bens Imóveis (ITBI) serão suportados '+peloC+despExc+'.\n\nAinda as partes têm ciência que, havendo algum apontamento insolúvel junto às certidões descritas na cláusula '+C4+', sejam pessoais ou sobre o imóvel, o sinal ora recebido será devolvido '+aoC+' integralmente, no prazo de até 48 (quarenta e oito) horas.\n\n\nDA IMISSÃO NA POSSE:\n\n'+C5+') '+OC+' '+serC+' na posse do imóvel '+ptrig+dmTxt+'.\n\n'+C6+') O imóvel deve ser entregue livre e desimpedido de pessoas e coisas de quaisquer naturezas (exceto as listadas na cláusula '+C2+').\n\n'+C7+') O atraso na imissão '+doC+' na posse do imóvel importará em multa a ser paga '+peloV+' '+aoC+', em valor equivalente a 1,5% (hum e meio por cento) do valor do imóvel por cada período de 30 dias do atraso, calculados pro rata dia.\n\n\nDAS DESPESAS — entrega das chaves:\n\n'+C8+') Todos os impostos, taxas, tarifas, contribuições, multas e despesas que recaiam sobre o Imóvel, com fato gerador até a data da entrega das chaves, serão de responsabilidade exclusiva '+doV+'. Caberá '+aoC+', a partir da data do recebimento destas, o pagamento de todos os impostos, taxas, tarifas e despesas com fato gerador posterior à entrega das chaves.\n\n\nDAS OBRIGAÇÕES:\n\n'+C9+') O presente é firmado em caráter irrevogável e irretratável, obrigando-se as partes por si, seus herdeiros ou sucessores, a qualquer título, a cumprir as obrigações ora assumidas.\n\n- Havendo inexecução deste Instrumento Particular por desistência '+doC+', '+esteC+' perderá em favor '+doV+' o sinal (descrito na cláusula '+C3+'-A) ora recebido. Por outro lado, se a inexecução ocorrer por desistência '+doV+', '+esteV+' será obrigado a devolver o valor do sinal recebido, mais o seu equivalente, nos moldes do artigo 420 do Código Civil Brasileiro de 2002, '+aoC+' em um prazo de até 72 horas da comunicação da inexecução.'+laudOb+averbCasTxt+'\n\n'+C10+') '+regTxt+clausEsp+'\n\n\nDOS HONORÁRIOS DE CORRETAGEM:\n\n'+CC+') '+corrTxt+'\n\n\nDAS DISPOSIÇÕES FINAIS:\n\n'+CD1+') Os Contratantes se obrigam a cumprir fielmente todos os termos e condições deste contrato, tornando sem efeito qualquer outro documento que divirja do seu conteúdo.\n\n'+CD2+') O presente instrumento só terá validade jurídica após o pagamento integral do valor do sinal descrito na cláusula '+C3+'-A, que deverá ser pago em até 48 (quarenta e oito) horas, contadas a partir da assinatura deste instrumento.\n\n'+CD3+') As partes elegem o foro da Comarca da cidade do Rio de Janeiro para dirimir todas as dúvidas ou questões porventura advindas do presente, com renúncia expressa a qualquer outro.\n\nE, por estarem assim justos e contratados, assinam o presente eletronicamente, na presença de duas testemunhas abaixo assinadas.\n\nRio de Janeiro, '+dia+' de '+mes+' de '+ano+'.\n\n\n________________________________________________________________________________\n\n'+sigs;
+  lastMinutaTxt=txt;
+  document.getElementById('rb').innerHTML=textToHtml(txt);
+  document.getElementById('resblk').style.display='block';
+  document.getElementById('nav').style.display='none';
+  document.querySelectorAll('.step').forEach(function(s){s.classList.remove('on');});
+  document.getElementById('resblk').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 upd();
