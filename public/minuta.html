@@ -633,7 +633,7 @@ async function extrairPreencher(prefix){
       else{content.push({type:'image',source:{type:'base64',media_type:mt,data:b64}});}
       content.push({type:'text',text:'[Documento: '+lbls[k]+']'});
     }
-    content.push({type:'text',text:'Extraia os dados e retorne APENAS JSON válido sem markdown:\n{\n"nome":"NOME EM MAIÚSCULAS",\n"sexo":"m ou f",\n"nacionalidade":"brasileiro ou brasileira",\n"estadoCivil":"solteiro|casado|divorciado|viuvo|separado",\n"profissao":"profissão em minúsculas",\n"rg":"número do RG",\n"rgOrgao":"ex: IFP/RJ",\n"cpf":"CPF formatado",\n"email":"ou vazio",\n"endereco":"endereço completo",\n"anuente":{"nome":"","sexo":"f","nacionalidade":"brasileiro","rg":"","rgOrgao":"","cpf":"","email":"","regime":"comunhão parcial de bens"} ou null se não casado\n}\nSe dado não encontrado use string vazia. Retorne SOMENTE o JSON.'});
+    content.push({type:'text',text:'Extraia os dados e retorne APENAS JSON válido sem markdown:\n{\n"nome":"NOME EM MAIÚSCULAS",\n"sexo":"m ou f",\n"nacionalidade":"brasileiro ou brasileira",\n"estadoCivil":"solteiro|casado|divorciado|viuvo|separado",\n"profissao":"profissão em minúsculas",\n"rg":"APENAS os dígitos do RG ex: 20772235",\n"rgOrgao":"APENAS o órgão ex: DETRAN/RJ ou IFP/RJ",\n"cpf":"CPF formatado",\n"email":"ou vazio",\n"endereco":"endereço completo",\n"anuente":{"nome":"","sexo":"f","nacionalidade":"brasileiro","rg":"APENAS dígitos do RG + órgão no campo rgOrgao","rgOrgao":"ex: IFP/RJ","cpf":"","email":"","regime":"OBRIGATÓRIO - extraia da certidão ex: comunhão parcial de bens"} ou null se não casado\n}\nSe dado não encontrado use string vazia. Retorne SOMENTE o JSON.'});
     var resp=await fetch('/api/proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:1000,messages:[{role:'user',content}]})});
     var data=await resp.json();
     var txt=(data.content||[]).find(function(b){return b.type==='text';});
@@ -695,7 +695,11 @@ function preencherCampos(prefix,d){
   }
 }
 
-function chkAnu(){document.getElementById('blanu').style.display=document.getElementById('v1ec').value==='casado'?'block':'none';}
+function chkAnu(){
+  var isCasado=document.getElementById('v1ec').value==='casado';
+  var conjEhVendedor=rv('nv')==='2'&&v2Conjuges;
+  document.getElementById('blanu').style.display=(isCasado&&!conjEhVendedor)?'block':'none';
+}
 function chkC1R(){document.getElementById('blc1r').style.display=document.getElementById('c1ec').value==='casado'?'block':'none';}
 function mgb(v){document.getElementById('bpb').style.display=v==='dias'?'block':'none';document.getElementById('bpbc').style.display=v==='certs'?'block':'none';document.getElementById('bpba').style.display=v==='alv'?'block':'none';}
 function mmc(v){document.getElementById('blfgts').style.display=v==='fgts'?'block':'none';document.getElementById('blpb').style.display=v==='propb'?'block':'none';}
@@ -1097,7 +1101,7 @@ var v2MesmoEnd=false,v2Conjuges=false,c2MesmoEnd=false,c2Conjuges=false;
 
 function togV2(tipo){
   if(tipo==='res'){v2MesmoEnd=!v2MesmoEnd;document.getElementById('sw-v2res').classList.toggle('on',v2MesmoEnd);document.getElementById('blk-v2-res').style.display=v2MesmoEnd?'none':'block';}
-  if(tipo==='conj'){v2Conjuges=!v2Conjuges;document.getElementById('sw-v2conj').classList.toggle('on',v2Conjuges);document.getElementById('blk-v2-cert').style.display=v2Conjuges?'none':'block';}
+  if(tipo==='conj'){v2Conjuges=!v2Conjuges;document.getElementById('sw-v2conj').classList.toggle('on',v2Conjuges);document.getElementById('blk-v2-cert').style.display=v2Conjuges?'none':'block';chkAnu();}
 }
 function togC2(tipo){
   if(tipo==='res'){c2MesmoEnd=!c2MesmoEnd;document.getElementById('sw-c2res').classList.toggle('on',c2MesmoEnd);document.getElementById('blk-c2-res').style.display=c2MesmoEnd?'none':'block';}
@@ -1130,8 +1134,8 @@ async function extrairParceiroInterno(prefix,outro,mesmoEnd,conjuges,btnId,stId)
       else content.push({type:'image',source:{type:'base64',media_type:cmt,data:cb64}});
       content.push({type:'text',text:'[Certidao de casamento do casal - extraia o regime de bens]'});
     }
-    var conjInstr=conjuges?'"regimeBens":"regime de bens do casal ex: comunhao parcial de bens",' :'';
-    content.push({type:'text',text:'Extraia os dados e retorne APENAS JSON valido sem markdown:\n{\n"nome":"NOME EM MAIUSCULAS",\n"sexo":"m ou f",\n"nacionalidade":"brasileiro ou brasileira",\n"estadoCivil":"solteiro|casado|divorciado|viuvo|separado",\n"profissao":"profissao em minusculas",\n"rg":"numero do RG",\n"rgOrgao":"ex: IFP/RJ",\n"cpf":"CPF formatado",\n"email":"ou vazio",\n"endereco":"endereco completo ou vazio",\n'+conjInstr+'\n"_ok":true\n}\nRetorne SOMENTE o JSON.'});
+    var conjInstr=conjuges?'"regimeBens":"regime de bens OBRIGATORIO - sempre consta na certidao de casamento ex: comunhao parcial de bens ou comunhao universal de bens ou separacao total de bens",' :'';
+    content.push({type:'text',text:'Extraia os dados e retorne APENAS JSON valido sem markdown:\n{\n"nome":"NOME EM MAIUSCULAS",\n"sexo":"m ou f",\n"nacionalidade":"brasileiro ou brasileira",\n"estadoCivil":"solteiro|casado|divorciado|viuvo|separado",\n"profissao":"profissao em minusculas",\n"rg":"APENAS os dígitos do RG ex: 20772235",\n"rgOrgao":"APENAS o órgão ex: DETRAN/RJ ou IFP/RJ",\n"cpf":"CPF formatado",\n"email":"ou vazio",\n"endereco":"endereco completo ou vazio",\n'+conjInstr+'\n"_ok":true\n}\nRetorne SOMENTE o JSON.'});
     var resp=await fetch('/api/proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:800,messages:[{role:'user',content}]})});
     var data=await resp.json();
     if(data.error)throw new Error(typeof data.error==='string'?data.error:(data.error.message||JSON.stringify(data.error)));
