@@ -577,7 +577,7 @@ async function extrairImovel(){
   var btn=document.getElementById('btn-ext-im'),st=document.getElementById('st-im');
   btn.disabled=true;btn.textContent='Extraindo...';st.textContent='Lendo...';var merged={};
   try{
-    for(var key in docs){var p=await callAPI([await docToContent(docs[key]),{type:'text',text:'Extraia dados do IMÓVEL (não do proprietário) e retorne APENAS JSON sem markdown:\n{"rua":"nome completo da rua do imóvel ex: RUA CINCO DE JULHO ou RUA SENADOR VERGUEIRO ou AVENIDA ATLANTICA — inclua RUA/AV/TRAVESSA no início, NÃO coloque nome de proprietário ou espólio","numPredio":"número físico do prédio na rua — é o número curto após o nome da rua no endereço ex: 56 ou 321. NÃO é código de inscrição IPTU com 5+ dígitos","apto":"APENAS os dígitos do número do apartamento ex: 201 ou 1004 — NÃO escreva a palavra APARTAMENTO","bairro":"nome do bairro onde fica o imóvel","matricula":"número da matrícula no RGI","oficio":"número do ofício do cartório de registro","iptu":"número de inscrição do IPTU"}\nUse string vazia para campos não encontrados. Retorne SOMENTE o JSON.'}]);for(var k in p){if(p[k]&&p[k]!=='')merged[k]=p[k];}}
+    for(var key in docs){var p=await callAPI([await docToContent(docs[key]),{type:'text',text:'Extraia dados do IMÓVEL (não do proprietário) e retorne APENAS JSON sem markdown:\n{"rua":"nome da rua do campo ENDEREÇO do documento ex: RUA CINCO DE JULHO — NÃO é o nome do Contribuinte/proprietário","numPredio":"número do prédio no campo ENDEREÇO — retire zeros à esquerda ex: 00231 → 231. NÃO é a inscrição IPTU","apto":"número do apartamento no campo ENDEREÇO após APT ex: APT 901 → 901. Apenas dígitos.","bairro":"nome do bairro onde fica o imóvel","matricula":"número da matrícula no RGI","oficio":"número do ofício do cartório de registro","iptu":"número de inscrição do IPTU"}\nUse string vazia para campos não encontrados. Retorne SOMENTE o JSON.'}]);for(var k in p){if(p[k]&&p[k]!=='')merged[k]=p[k];}}
     function set(id,val){var el=document.getElementById(id);if(el&&val)el.value=val;}
     set('irua',merged.rua);set('inpred',merged.numPredio);set('iapto',merged.apto);set('ibairro',merged.bairro);set('imat',merged.matricula);set('iofic',merged.oficio);set('iiptu',merged.iptu);
     st.textContent='✓ Preenchido — revise antes de continuar';st.style.color='var(--am)';
@@ -720,19 +720,27 @@ function gerar(){
 
 // ─── Checklist de móveis ───────────────────────────────────────────────────
 var COMODOS=[
-  {id:'sala',nome:'SALA',itens:['Marcenaria planejada','Armario planejado','Projeto de iluminacao','Luminarias','Ar condicionado tipo split','Cortinas','Persianas','Mesa de jantar','Sofa','Home theater']},
-  {id:'cozinha',nome:'COZINHA',itens:['Marcenaria planejada','Armario planejado','Fogao','Coifa','Cooktop','Forno embutido','Geladeira','Microondas','Maquina de lavar','Maquina de secar','Lava-loucas','Bancada de pedra']},
-  {id:'quartos',nome:'QUARTOS',itens:['Marcenaria planejada','Armario planejado','Ar condicionado tipo split','Cortinas','Persianas']},
-  {id:'banheiros',nome:'BANHEIROS',itens:['Espelho','Armario de banheiro','Metais e louças','Box de vidro','Aquecedor de agua']},
-  {id:'varanda',nome:'VARANDA / SACADA',itens:['Churrasqueira','Bancada','Persiana']},
-  {id:'areaserv',nome:'ÁREA DE SERVIÇO / BANHEIRO DE SERVIÇO',itens:['Maquina de lavar','Maquina de secar','Armario planejado']},
-  {id:'escritorio',nome:'ESCRITÓRIO / HOME OFFICE',itens:['Marcenaria planejada','Armario planejado','Ar condicionado tipo split']}
+  {id:'sala',nome:'Sala',itens:['Ventilador de teto','Estante de madeira','Prateleiras','Marcenaria fixa / planejada','Projeto de iluminação','Luminárias','Luminárias embutidas','Ar-condicionado tipo split','Ar-condicionado tipo janela']},
+  {id:'varanda',nome:'Varanda',itens:['Churrasqueira','Armários fixos','Prateleiras','Iluminação','Cortina']},
+  {id:'quarto1',nome:'Quarto 1',itens:['Armários embutidos / planejados','Marcenaria embutida / planejada','Móveis planejados','Bancada planejada','Cabeceira planejada','Sapateira','Iluminação','Cortinas','Cortina blackout','Ar-condicionado tipo split','Ar-condicionado tipo janela']},
+  {id:'quarto2',nome:'Quarto 2',itens:['Armários embutidos / planejados','Marcenaria embutida / planejada','Móveis planejados','Bancada planejada','Cabeceira planejada','Sapateira','Iluminação','Cortinas','Cortina blackout','Ar-condicionado tipo split','Ar-condicionado tipo janela']},
+  {id:'quarto3',nome:'Quarto 3',itens:['Armários embutidos / planejados','Marcenaria embutida / planejada','Móveis planejados','Bancada planejada','Cabeceira planejada','Sapateira','Iluminação','Cortinas','Cortina blackout','Ar-condicionado tipo split','Ar-condicionado tipo janela']},
+  {id:'suite',nome:'Suíte',itens:['Armários embutidos / planejados','Marcenaria embutida / planejada','Móveis planejados','Bancada planejada','Cabeceira planejada','Sapateira','Iluminação','Cortinas','Cortina blackout','Ar-condicionado tipo split','Ar-condicionado tipo janela']},
+  {id:'banho1',nome:'Banheiro 1',itens:['Louças e metais','Box Blindex','Espelho','Armários planejados','Marcenaria embutida']},
+  {id:'banho2',nome:'Banheiro 2',itens:['Louças e metais','Box Blindex','Espelho','Armários planejados','Marcenaria embutida']},
+  {id:'banho3',nome:'Banheiro 3',itens:['Louças e metais','Box Blindex','Espelho','Armários planejados','Marcenaria embutida']},
+  {id:'banhosuite',nome:'Banheiro da suíte',itens:['Louças e metais','Box Blindex','Espelho','Armários planejados','Marcenaria embutida']},
+  {id:'cozinha',nome:'Cozinha',itens:['Armários planejados','Marcenaria fixa','Prateleiras','Metais','Iluminação','Forno','Forno embutido','Fogão','Cooktop','Coifa','Exaustor','Luminárias embutidas']},
+  {id:'areaserv',nome:'Área de Serviço',itens:['Louças e metais','Armários fixos','Marcenaria planejada','Varal','Aquecedor a gás']},
+  {id:'dependencia',nome:'Dependência',itens:['Prateleiras']},
+  {id:'banhserv',nome:'Banheiro de serviço',itens:['Louças e metais']}
 ];
 
 var COMODOS_LABELS={
-  sala:'SALA',cozinha:'COZINHA',quartos:'QUARTOS',banheiros:'BANHEIROS',
-  varanda:'VARANDA / SACADA',areaserv:'ÁREA DE SERVIÇO / BANHEIRO DE SERVIÇO',
-  escritorio:'ESCRITÓRIO / HOME OFFICE'
+  sala:'SALA',varanda:'VARANDA',quarto1:'QUARTO 1',quarto2:'QUARTO 2',quarto3:'QUARTO 3',
+  suite:'SUÍTE',banho1:'BANHEIRO 1',banho2:'BANHEIRO 2',banho3:'BANHEIRO 3',
+  banhosuite:'BANHEIRO DA SUÍTE',cozinha:'COZINHA',areaserv:'ÁREA DE SERVIÇO',
+  dependencia:'DEPENDÊNCIA',banhserv:'BANHEIRO DE SERVIÇO'
 };
 
 var ITENS_LABELS={
@@ -766,34 +774,36 @@ function renderMoveis(){
     var s=mvState[c.id];
     var wrap=document.createElement('div');wrap.className='mvroom';
     var hd=document.createElement('div');hd.className='mvroom-hd';
-    hd.onclick=function(){s.on=!s.on;sw.classList.toggle('on',s.on);body.classList.toggle('show',s.on);};
     var sw=document.createElement('div');sw.className='sw'+(s.on?' on':'');
     var lbl=document.createElement('label');lbl.textContent=COMODOS_LABELS[c.id]||c.nome;
     hd.appendChild(sw);hd.appendChild(lbl);
     var body=document.createElement('div');body.className='mvroom-body'+(s.on?' show':'');
-    if(s.on){
-      c.itens.forEach(function(item){
-        var row=document.createElement('div');row.className='mvitem';
-        var cb=document.createElement('input');cb.type='checkbox';cb.checked=s.chk[item]||false;
-        cb.onchange=function(){s.chk[item]=cb.checked;};
-        var lb=document.createElement('label');lb.textContent=ITENS_LABELS[item]||item;
-        row.appendChild(cb);row.appendChild(lb);body.appendChild(row);
-      });
-      (s.custom||[]).forEach(function(ci,idx){
-        var row=document.createElement('div');row.className='mvitem';
-        var cb=document.createElement('input');cb.type='checkbox';cb.checked=true;
-        var lb=document.createElement('label');lb.textContent=ci;
-        var rm=document.createElement('button');rm.textContent='×';rm.className='mv-rm';
-        rm.onclick=function(){s.custom.splice(idx,1);renderMoveis();};
-        row.appendChild(cb);row.appendChild(lb);row.appendChild(rm);body.appendChild(row);
-      });
-      var addRow=document.createElement('div');addRow.className='mv-add-row';
-      var inp=document.createElement('input');inp.type='text';inp.placeholder='+ item personalizado';inp.className='mv-inp';
-      var btn=document.createElement('button');btn.textContent='Adicionar';btn.className='btn-ext';btn.style.padding='4px 10px';btn.style.fontSize='11px';
-      btn.onclick=function(){var v=inp.value.trim();if(v){s.custom.push(v);inp.value='';renderMoveis();}};
-      addRow.appendChild(inp);addRow.appendChild(btn);
-      body.appendChild(addRow);
-    }
+    // Always render items regardless of s.on
+    c.itens.forEach(function(item){
+      var row=document.createElement('div');row.className='mvitem';
+      var cb=document.createElement('input');cb.type='checkbox';
+      cb.checked=s.chk[item]||false;
+      cb.onchange=function(){s.chk[item]=cb.checked;};
+      var lb=document.createElement('label');lb.textContent=item;
+      row.appendChild(cb);row.appendChild(lb);body.appendChild(row);
+    });
+    (s.custom||[]).forEach(function(ci,idx){
+      var row=document.createElement('div');row.className='mvitem';
+      var cb=document.createElement('input');cb.type='checkbox';cb.checked=true;
+      var lb=document.createElement('label');lb.textContent=ci;
+      var rm=document.createElement('button');rm.textContent='×';rm.className='mv-rm';
+      rm.onclick=function(e){e.stopPropagation();s.custom.splice(idx,1);renderMoveis();};
+      row.appendChild(cb);row.appendChild(lb);row.appendChild(rm);body.appendChild(row);
+    });
+    var addRow=document.createElement('div');addRow.className='mv-add-row';
+    var inp=document.createElement('input');inp.type='text';inp.placeholder='+ item personalizado';inp.className='mv-inp';
+    inp.onclick=function(e){e.stopPropagation();};
+    var btn=document.createElement('button');btn.textContent='+ item';btn.className='mv-add-btn';
+    btn.onclick=function(e){e.stopPropagation();var v=inp.value.trim();if(v){s.custom.push(v);inp.value='';renderMoveis();}};
+    addRow.appendChild(inp);addRow.appendChild(btn);
+    body.appendChild(addRow);
+    // Toggle: just show/hide body
+    hd.onclick=function(){s.on=!s.on;sw.classList.toggle('on',s.on);body.classList.toggle('show',s.on);};
     wrap.appendChild(hd);wrap.appendChild(body);
     el.appendChild(wrap);
   });
