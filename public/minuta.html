@@ -573,7 +573,7 @@ async function extrairImovel(){
   var btn=document.getElementById('btn-ext-im'),st=document.getElementById('st-im');
   btn.disabled=true;btn.textContent='Extraindo...';st.textContent='Lendo...';var merged={};
   try{
-    for(var key in docs){var p=await callAPI([await docToContent(docs[key]),{type:'text',text:'Extraia dados do IMÓVEL (não do proprietário) e retorne APENAS JSON sem markdown:\n{"rua":"NOME DA RUA do imóvel ex: Rua Senador Vergueiro ou Avenida Atlântica — NÃO coloque nome de pessoa","numPredio":"número do prédio na rua ex: 56 ou 901 — apenas dígitos, NÃO código de inscrição","apto":"APENAS os dígitos do número do apartamento ex: 201 ou 1004 — NÃO escreva a palavra APARTAMENTO","bairro":"nome do bairro onde fica o imóvel","matricula":"número da matrícula no RGI","oficio":"número do ofício do cartório de registro","iptu":"número de inscrição do IPTU"}\nUse string vazia para campos não encontrados. Retorne SOMENTE o JSON.'}]);for(var k in p){if(p[k]&&p[k]!=='')merged[k]=p[k];}}
+    for(var key in docs){var p=await callAPI([await docToContent(docs[key]),{type:'text',text:'Extraia dados do IMÓVEL (não do proprietário) e retorne APENAS JSON sem markdown:\n{"rua":"nome completo da rua do imóvel ex: RUA CINCO DE JULHO ou RUA SENADOR VERGUEIRO ou AVENIDA ATLANTICA — inclua RUA/AV/TRAVESSA no início, NÃO coloque nome de proprietário ou espólio","numPredio":"número físico do prédio na rua — é o número curto após o nome da rua no endereço ex: 56 ou 321. NÃO é código de inscrição IPTU com 5+ dígitos","apto":"APENAS os dígitos do número do apartamento ex: 201 ou 1004 — NÃO escreva a palavra APARTAMENTO","bairro":"nome do bairro onde fica o imóvel","matricula":"número da matrícula no RGI","oficio":"número do ofício do cartório de registro","iptu":"número de inscrição do IPTU"}\nUse string vazia para campos não encontrados. Retorne SOMENTE o JSON.'}]);for(var k in p){if(p[k]&&p[k]!=='')merged[k]=p[k];}}
     function set(id,val){var el=document.getElementById(id);if(el&&val)el.value=val;}
     set('irua',merged.rua);set('inpred',merged.numPredio);set('iapto',merged.apto);set('ibairro',merged.bairro);set('imat',merged.matricula);set('iofic',merged.oficio);set('iiptu',merged.iptu);
     st.textContent='✓ Preenchido — revise antes de continuar';st.style.color='var(--am)';
@@ -755,7 +755,7 @@ var mvState={};
 COMODOS.forEach(function(c){mvState[c.id]={on:false,chk:{},custom:[]};c.itens.forEach(function(i){mvState[c.id].chk[i]=false;});});
 
 function renderMoveis(){
-  var el=document.getElementById('mov-checklist');if(!el)return;
+  var el=document.getElementById('mvlista');if(!el)return;
   if(!TV['moveis']){el.innerHTML='';return;}
   el.innerHTML='';
   COMODOS.forEach(function(c){
