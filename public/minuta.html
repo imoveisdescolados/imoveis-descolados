@@ -179,6 +179,34 @@ footer{text-align:center;margin-top:2rem;font-family:Arial,sans-serif;font-size:
 </select></div></div>
   </div>
 </div>
+<div class="ext-card" id="ext-v2" style="display:none">
+  <div class="ext-title">⚡ Vendedor 2 — preencher automaticamente</div>
+  <div class="ext-hint">CNH é individual. Para comprovante e certidão escolha se é igual ao vendedor 1.</div>
+  <div class="fr c1" style="margin-bottom:.6rem">
+    <div class="ubox" id="ub-v2-cnh" onclick="trigUp('v2','cnh')">
+      <input type="file" id="fi-v2-cnh" accept="image/*,application/pdf" style="display:none" onchange="hdlUp('v2','cnh',this)">
+      <span class="ubox-icon" id="ic-v2-cnh">🪪</span><span>CNH do vendedor 2</span>
+    </div>
+  </div>
+  <div class="tog" onclick="togV2('res')" style="margin-bottom:6px"><div class="sw" id="sw-v2res"></div><label>Mesmo endereço do vendedor 1?</label></div>
+  <div id="blk-v2-res" style="margin-bottom:6px">
+    <div class="ubox" id="ub-v2-res" onclick="trigUp('v2','res')">
+      <input type="file" id="fi-v2-res" accept="image/*,application/pdf" style="display:none" onchange="hdlUp('v2','res',this)">
+      <span class="ubox-icon" id="ic-v2-res">🏠</span><span>Comp. Residência vendedor 2</span>
+    </div>
+  </div>
+  <div class="tog" onclick="togV2('conj')"><div class="sw" id="sw-v2conj"></div><label>Os dois vendedores são cônjuges (mesma certidão)?</label></div>
+  <div id="blk-v2-cert" style="display:none;margin-top:6px">
+    <div class="ubox" id="ub-v2-cert" onclick="trigUp('v2','cert')">
+      <input type="file" id="fi-v2-cert" accept="image/*,application/pdf" style="display:none" onchange="hdlUp('v2','cert',this)">
+      <span class="ubox-icon" id="ic-v2-cert">📄</span><span>Certidão do vendedor 2</span>
+    </div>
+  </div>
+  <div style="margin-top:.75rem">
+    <button class="btn-ext" id="btn-ext-v2" onclick="extrairV2()">Extrair e preencher ↗</button>
+    <span class="ext-status" id="st-v2"></span>
+  </div>
+</div>
 <div class="card" id="cv2" style="display:none">
   <div class="sdiv">Vendedor 2</div>
   <div class="fr c2"><div><label class="fl">Nome completo</label><input type="text" id="v2n"></div><div><label class="fl">Sexo</label><div class="rg"><label class="ro" onclick="sr(this,'v2s','m');updProfNac('v2','m')"><input type="radio" name="v2s" value="m">Masculino</label><label class="ro" onclick="sr(this,'v2s','f');updProfNac('v2','f')"><input type="radio" name="v2s" value="f">Feminino</label></div></div></div>
@@ -257,6 +285,34 @@ footer{text-align:center;margin-top:2rem;font-family:Arial,sans-serif;font-size:
 <option value="comunhão universal de bens">Comunhão universal de bens</option>
 <option value="separação total de bens">Separação total de bens</option>
 </select></div></div>
+</div>
+<div class="ext-card" id="ext-c2" style="display:none">
+  <div class="ext-title">⚡ Comprador 2 — preencher automaticamente</div>
+  <div class="ext-hint">CNH é individual. Para comprovante e certidão escolha se é igual ao comprador 1.</div>
+  <div class="fr c1" style="margin-bottom:.6rem">
+    <div class="ubox" id="ub-c2-cnh" onclick="trigUp('c2','cnh')">
+      <input type="file" id="fi-c2-cnh" accept="image/*,application/pdf" style="display:none" onchange="hdlUp('c2','cnh',this)">
+      <span class="ubox-icon" id="ic-c2-cnh">🪪</span><span>CNH do comprador 2</span>
+    </div>
+  </div>
+  <div class="tog" onclick="togC2('res')" style="margin-bottom:6px"><div class="sw" id="sw-c2res"></div><label>Mesmo endereço do comprador 1?</label></div>
+  <div id="blk-c2-res" style="margin-bottom:6px">
+    <div class="ubox" id="ub-c2-res" onclick="trigUp('c2','res')">
+      <input type="file" id="fi-c2-res" accept="image/*,application/pdf" style="display:none" onchange="hdlUp('c2','res',this)">
+      <span class="ubox-icon" id="ic-c2-res">🏠</span><span>Comp. Residência comprador 2</span>
+    </div>
+  </div>
+  <div class="tog" onclick="togC2('conj')"><div class="sw" id="sw-c2conj"></div><label>Os dois compradores são cônjuges (mesma certidão)?</label></div>
+  <div id="blk-c2-cert" style="display:none;margin-top:6px">
+    <div class="ubox" id="ub-c2-cert" onclick="trigUp('c2','cert')">
+      <input type="file" id="fi-c2-cert" accept="image/*,application/pdf" style="display:none" onchange="hdlUp('c2','cert',this)">
+      <span class="ubox-icon" id="ic-c2-cert">📄</span><span>Certidão do comprador 2</span>
+    </div>
+  </div>
+  <div style="margin-top:.75rem">
+    <button class="btn-ext" id="btn-ext-c2" onclick="extrairC2()">Extrair e preencher ↗</button>
+    <span class="ext-status" id="st-c2"></span>
+  </div>
 </div>
 <div class="card" id="cc2" style="display:none">
   <div class="sdiv">Comprador 2</div>
@@ -455,8 +511,8 @@ function tg(k){
 }
 function tv(k){return TV[k]||false;}
 
-function mv2(b){document.getElementById('cv2').style.display=b?'block':'none';}
-function mc2(b){document.getElementById('cc2').style.display=b?'block':'none';}
+function mv2(b){document.getElementById('cv2').style.display=b?'block':'none';document.getElementById('ext-v2').style.display=b?'block':'none';}
+function mc2(b){document.getElementById('cc2').style.display=b?'block':'none';document.getElementById('ext-c2').style.display=b?'block':'none';}
 
 function chkBancoOutro(id){
   var sel=document.getElementById(id);
@@ -1036,6 +1092,73 @@ function getMoveisTxt(){
   });
   return lines.join('\n').trim();
 }
+
+var v2MesmoEnd=false,v2Conjuges=false,c2MesmoEnd=false,c2Conjuges=false;
+
+function togV2(tipo){
+  if(tipo==='res'){v2MesmoEnd=!v2MesmoEnd;document.getElementById('sw-v2res').classList.toggle('on',v2MesmoEnd);document.getElementById('blk-v2-res').style.display=v2MesmoEnd?'none':'block';}
+  if(tipo==='conj'){v2Conjuges=!v2Conjuges;document.getElementById('sw-v2conj').classList.toggle('on',v2Conjuges);document.getElementById('blk-v2-cert').style.display=v2Conjuges?'none':'block';}
+}
+function togC2(tipo){
+  if(tipo==='res'){c2MesmoEnd=!c2MesmoEnd;document.getElementById('sw-c2res').classList.toggle('on',c2MesmoEnd);document.getElementById('blk-c2-res').style.display=c2MesmoEnd?'none':'block';}
+  if(tipo==='conj'){c2Conjuges=!c2Conjuges;document.getElementById('sw-c2conj').classList.toggle('on',c2Conjuges);document.getElementById('blk-c2-cert').style.display=c2Conjuges?'none':'block';}
+}
+
+async function extrairParceiroInterno(prefix,outro,mesmoEnd,conjuges,btnId,stId){
+  var cnh=docsCache[prefix]&&docsCache[prefix]['cnh'];
+  if(!cnh){alert('Faca upload da CNH do '+prefix+'.');return;}
+  var btn=document.getElementById(btnId),st=document.getElementById(stId);
+  btn.disabled=true;btn.textContent='Extraindo...';st.textContent='';
+  try{
+    var content=[];
+    var b64=await fileToB64(cnh),mt=cnh.type||'image/jpeg';
+    if(mt==='application/pdf')content.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:b64}});
+    else content.push({type:'image',source:{type:'base64',media_type:mt,data:b64}});
+    content.push({type:'text',text:'[CNH do segundo contratante]'});
+    if(!mesmoEnd&&docsCache[prefix]&&docsCache[prefix]['res']){
+      var rf=docsCache[prefix]['res'],rb64=await fileToB64(rf),rmt=rf.type||'image/jpeg';
+      if(rmt==='application/pdf')content.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:rb64}});
+      else content.push({type:'image',source:{type:'base64',media_type:rmt,data:rb64}});
+      content.push({type:'text',text:'[Comprovante de residencia do segundo contratante]'});
+    }
+    var certFile=null;
+    if(conjuges&&docsCache[outro]&&docsCache[outro]['cert'])certFile=docsCache[outro]['cert'];
+    else if(!conjuges&&docsCache[prefix]&&docsCache[prefix]['cert'])certFile=docsCache[prefix]['cert'];
+    if(certFile){
+      var cb64=await fileToB64(certFile),cmt=certFile.type||'image/jpeg';
+      if(cmt==='application/pdf')content.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:cb64}});
+      else content.push({type:'image',source:{type:'base64',media_type:cmt,data:cb64}});
+      content.push({type:'text',text:'[Certidao de casamento do casal - extraia o regime de bens]'});
+    }
+    var conjInstr=conjuges?'"regimeBens":"regime de bens do casal ex: comunhao parcial de bens",' :'';
+    content.push({type:'text',text:'Extraia os dados e retorne APENAS JSON valido sem markdown:\n{\n"nome":"NOME EM MAIUSCULAS",\n"sexo":"m ou f",\n"nacionalidade":"brasileiro ou brasileira",\n"estadoCivil":"solteiro|casado|divorciado|viuvo|separado",\n"profissao":"profissao em minusculas",\n"rg":"numero do RG",\n"rgOrgao":"ex: IFP/RJ",\n"cpf":"CPF formatado",\n"email":"ou vazio",\n"endereco":"endereco completo ou vazio",\n'+conjInstr+'\n"_ok":true\n}\nRetorne SOMENTE o JSON.'});
+    var resp=await fetch('/api/proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:800,messages:[{role:'user',content}]})});
+    var data=await resp.json();
+    if(data.error)throw new Error(typeof data.error==='string'?data.error:(data.error.message||JSON.stringify(data.error)));
+    var txt=(data.content||[]).find(function(b){return b.type==='text';});
+    if(!txt)throw new Error('Sem resposta: '+JSON.stringify(data).slice(0,150));
+    var clean=txt.text.replace(/```json|```/g,'').trim();
+    var d=JSON.parse(clean);
+    preencherCampos(prefix,d);
+    if(mesmoEnd){var eEl=document.getElementById(prefix+'end');if(eEl)eEl.value=document.getElementById(outro+'end').value||'';}
+    if(conjuges&&d.regimeBens){
+      var regId=prefix[0]==='v'?'v2regCas':'c2regCas';
+      var regEl=document.getElementById(regId);
+      if(regEl){
+        var rv3=d.regimeBens.toLowerCase();
+        ['comunhao parcial de bens','comunhao universal de bens','separacao total de bens'].forEach(function(o){
+          if(rv3.indexOf(o.split(' ').slice(0,2).join(' '))>-1)regEl.value=o.replace('comunhao','comunhão').replace('separacao','separação');
+        });
+      }
+    }
+    st.textContent='Preenchido'+(conjuges?' (conjuge detectado)':'')+' - revise antes de continuar';
+    st.style.color='var(--am)';
+  }catch(e){st.textContent='Erro: '+e.message;st.style.color='var(--dg)';}
+  btn.disabled=false;btn.textContent='Extrair e preencher';
+}
+
+function extrairV2(){extrairParceiroInterno('v2','v1',v2MesmoEnd,v2Conjuges,'btn-ext-v2','st-v2');}
+function extrairC2(){extrairParceiroInterno('c2','c1',c2MesmoEnd,c2Conjuges,'btn-ext-c2','st-c2');}
 
 upd();
 </script>
