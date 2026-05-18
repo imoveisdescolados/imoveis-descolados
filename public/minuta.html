@@ -541,7 +541,8 @@ async function extrairImovel(){
     var resp=await fetch('/api/proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:500,messages:[{role:'user',content}]})});
     var data=await resp.json();
     var txt=(data.content||[]).find(function(b){return b.type==='text';});
-    if(!txt)throw new Error('Sem resposta da IA');
+    if(data.error)throw new Error(typeof data.error==='string'?data.error:(data.error.message||JSON.stringify(data.error)));
+    if(!txt)throw new Error('Sem resposta: '+JSON.stringify(data).slice(0,200));
     var clean=txt.text.replace(/```json|```/g,'').trim();
     var d=JSON.parse(clean);
     function set(id,val){var el=document.getElementById(id);if(el&&val)el.value=val;}
@@ -580,7 +581,8 @@ async function extrairPreencher(prefix){
     var resp=await fetch('/api/proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content}]})});
     var data=await resp.json();
     var txt=(data.content||[]).find(function(b){return b.type==='text';});
-    if(!txt)throw new Error('Sem resposta da IA');
+    if(data.error)throw new Error(typeof data.error==='string'?data.error:(data.error.message||JSON.stringify(data.error)));
+    if(!txt)throw new Error('Sem resposta: '+JSON.stringify(data).slice(0,200));
     var clean=txt.text.replace(/```json|```/g,'').trim();
     var parsed=JSON.parse(clean);
     preencherCampos(prefix,parsed);
